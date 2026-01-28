@@ -4,11 +4,11 @@ entrypoint = 0x80025C00
 elf_path = "roms/hm64.elf"
 rom_file_path = "roms/baserom.us.z64"
 output_func_path = "RecompiledFuncs"
-trace_mode = true
+trace_mode = false  # Was true - veroorzaakte performance overhead!
 
 [patches]
-# nuGfxTaskAllEndWait is now handled via RECOMP_PATCH in patches/nusys_patches.c
-# (using yield_self_1ms instead of stub for proper synchronization)
+# NOTE: Do NOT stub nuGfxThreadStart - causes black screen!
+# HM64 needs the NuSystem graphics thread (unlike MegaMan64)
 
 # MegaMan64-style yield in stepMainLoop busy-wait
 # Reference: MegaMan64Recompiled/us.rev1.toml func_8008A02C_6542C
