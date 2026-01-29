@@ -144,7 +144,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     flags |= SDL_WINDOW_VULKAN;
 #endif
 
-    window = SDL_CreateWindow("MarioKart 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
+    window = SDL_CreateWindow("Harvest Moon 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
 #if defined(__linux__)
     SetImageAsIcon("icons/512.png",window);
     if (ultramodern::renderer::get_graphics_config().wm_option == ultramodern::renderer::WindowMode::Fullscreen) { // TODO: Remove once RT64 gets native fullscreen support on Linux
@@ -352,10 +352,10 @@ gpr get_entrypoint_address();
 // array of supported GameEntry objects
 std::vector<recomp::GameEntry> supported_games = {
     {
-        .rom_hash = 0x54572403569b87c1, // retail
-        .internal_name = "MARIOKART64",
-        .game_id = u8"mk64.us",
-        .mod_game_id = "mk64",
+        .rom_hash = 0x68B2C3755C527305, // HM64 US retail
+        .internal_name = "HARVESTMOON64",
+        .game_id = u8"hm64.n64.us.1.0",
+        .mod_game_id = "hm64",
         .save_type = recomp::SaveType::Eep4k,
         .is_enabled = true,
         .entrypoint_address = get_entrypoint_address(),
@@ -642,19 +642,20 @@ int main(int argc, char** argv) {
 
     //recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
 
+    // MK64 patch exports - disabled for HM64 (add HM64-specific exports later)
     // REGISTER_FUNC(recomp_get_window_resolution);
-    REGISTER_FUNC(recomp_get_aspect_ratio);
-    REGISTER_FUNC(recomp_get_target_framerate);
+    // REGISTER_FUNC(recomp_get_aspect_ratio);
+    // REGISTER_FUNC(recomp_get_target_framerate);
     // REGISTER_FUNC(recomp_get_autosave_enabled);
     // REGISTER_FUNC(recomp_get_analog_cam_enabled);
-    REGISTER_FUNC(recomp_get_camera_inputs);
-    REGISTER_FUNC(recomp_get_targeting_mode);
-    REGISTER_FUNC(recomp_get_bgm_volume);
-    REGISTER_FUNC(recomp_get_low_health_beeps_enabled);
-    REGISTER_FUNC(recomp_get_gyro_deltas);
-    REGISTER_FUNC(recomp_get_mouse_deltas);
-    REGISTER_FUNC(recomp_get_inverted_axes);
-    REGISTER_FUNC(recomp_get_analog_inverted_axes);
+    // REGISTER_FUNC(recomp_get_camera_inputs);
+    // REGISTER_FUNC(recomp_get_targeting_mode);
+    // REGISTER_FUNC(recomp_get_bgm_volume);
+    // REGISTER_FUNC(recomp_get_low_health_beeps_enabled);
+    // REGISTER_FUNC(recomp_get_gyro_deltas);
+    // REGISTER_FUNC(recomp_get_mouse_deltas);
+    // REGISTER_FUNC(recomp_get_inverted_axes);
+    // REGISTER_FUNC(recomp_get_analog_inverted_axes);
     recompui::register_ui_exports();
     recomputil::register_data_api_exports();
 

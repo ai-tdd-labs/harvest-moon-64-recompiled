@@ -1,5 +1,7 @@
-#ifndef __UI_FUNCS_H__
-#define __UI_FUNCS_H__
+#ifndef __RECOMPUI_EVENT_STRUCTS_H__
+#define __RECOMPUI_EVENT_STRUCTS_H__
+
+#include <stdbool.h>
 
 // These two enums must be kept in sync with src/ui/elements/ui_types.h!
 typedef enum {

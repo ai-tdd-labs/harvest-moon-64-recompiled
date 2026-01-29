@@ -216,3 +216,19 @@ extern "C" void recomp_set_right_analog_suppressed(uint8_t* rdram, recomp_contex
 
     recomp::set_right_analog_suppressed(suppressed);
 }
+
+// HM64 stub functions - these are referenced by patches but not used yet
+extern "C" void recomp_printf(uint8_t* rdram, recomp_context* ctx) {
+    // Stub - HM64 doesn't have a recompiled printf, patches can call this
+    // For now, just do nothing. Can add actual printf later if needed.
+}
+
+extern "C" void bzero_recomp(uint8_t* rdram, recomp_context* ctx) {
+    // bzero(dest, len) - clear memory to zero
+    PTR(void) dest = _arg<0, PTR(void)>(rdram, ctx);
+    u32 len = _arg<1, u32>(rdram, ctx);
+
+    for (u32 i = 0; i < len; i++) {
+        MEM_B(i, (gpr)dest) = 0;
+    }
+}
