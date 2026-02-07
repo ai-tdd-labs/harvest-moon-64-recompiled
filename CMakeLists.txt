@@ -11,6 +11,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 # set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+option(RECOMP_ENABLE_TRACE "Enable trace logging in recompiled functions" ON)
+if (RECOMP_ENABLE_TRACE)
+    add_compile_definitions(RECOMP_TRACE=1)
+endif()
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_SIMULATE_ID STREQUAL "MSVC")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-everything /W4")
@@ -87,62 +91,69 @@ file(GLOB FUNC_CXX_SOURCES ${CMAKE_SOURCE_DIR}/RecompiledFuncs/*.cpp)
 
 target_sources(RecompiledFuncs PRIVATE ${FUNC_C_SOURCES} ${FUNC_CXX_SOURCES})
 
+option(RECOMP_DISABLE_PATCHES "Disable MK64 patches for HM64 builds" ON)
+if (RECOMP_DISABLE_PATCHES)
+    add_compile_definitions(RECOMP_DISABLE_PATCHES)
+endif()
+
 # PatchesLib - Library containing the recompiled output for any custom function patches
-add_library(PatchesLib STATIC)
+if (NOT RECOMP_DISABLE_PATCHES)
+    add_library(PatchesLib STATIC)
 
-target_compile_options(PatchesLib PRIVATE
-    # -Wno-unused-but-set-variable
-    -fno-strict-aliasing
-    -Wno-unused-variable
-    -Wno-implicit-function-declaration
-)
+    target_compile_options(PatchesLib PRIVATE
+        # -Wno-unused-but-set-variable
+        -fno-strict-aliasing
+        -Wno-unused-variable
+        -Wno-implicit-function-declaration
+    )
 
-target_include_directories(PatchesLib PRIVATE
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
-    ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
-)
+    target_include_directories(PatchesLib PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/ultramodern/include
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/librecomp/include
+        ${CMAKE_SOURCE_DIR}/lib/N64ModernRuntime/N64Recomp/include
+    )
 
-target_sources(PatchesLib PRIVATE
-    ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
-    ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
-)
+    target_sources(PatchesLib PRIVATE
+        ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
+        ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
+    )
 
-set_source_files_properties(${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c PROPERTIES COMPILE_FLAGS -fno-strict-aliasing)
+    set_source_files_properties(${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c PROPERTIES COMPILE_FLAGS -fno-strict-aliasing)
 
-# Build patches elf
-if(NOT DEFINED PATCHES_C_COMPILER)
-    set(PATCHES_C_COMPILER clang)
+    # Build patches elf
+    if(NOT DEFINED PATCHES_C_COMPILER)
+        set(PATCHES_C_COMPILER clang)
+    endif()
+
+    if(NOT DEFINED PATCHES_LD)
+        set(PATCHES_LD ld.lld)
+    endif()
+
+    add_custom_target(PatchesBin
+        COMMAND ${CMAKE_COMMAND} -E env CC=${PATCHES_C_COMPILER} LD=${PATCHES_LD} make
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/patches
+        BYPRODUCTS ${CMAKE_SOURCE_DIR}/patches/patches.elf
+    )
+
+    # Generate patches_bin.c from patches.bin
+    add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
+        COMMAND file_to_c ${CMAKE_SOURCE_DIR}/patches/patches.bin mm_patches_bin ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.h
+        DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.bin
+    )
+
+    # Recompile patches elf into patches.c and patches.bin
+    add_custom_command(OUTPUT
+                           ${CMAKE_SOURCE_DIR}/patches/patches.bin
+                           ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
+                           ${CMAKE_SOURCE_DIR}/RecompiledPatches/recomp_overlays.inl
+                           ${CMAKE_SOURCE_DIR}/RecompiledPatches/funcs.h
+                       # TODO: Look into why modifying patches requires two builds to take
+                       COMMAND ./N64Recomp patches.toml
+                       WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+                       DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
+    )
 endif()
-
-if(NOT DEFINED PATCHES_LD)
-    set(PATCHES_LD ld.lld)
-endif()
-
-add_custom_target(PatchesBin
-    COMMAND ${CMAKE_COMMAND} -E env CC=${PATCHES_C_COMPILER} LD=${PATCHES_LD} make
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/patches
-    BYPRODUCTS ${CMAKE_SOURCE_DIR}/patches/patches.elf
-)
-
-# Generate patches_bin.c from patches.bin
-add_custom_command(OUTPUT ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c
-    COMMAND file_to_c ${CMAKE_SOURCE_DIR}/patches/patches.bin mm_patches_bin ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.c ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches_bin.h
-    DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.bin
-)
-
-# Recompile patches elf into patches.c and patches.bin
-add_custom_command(OUTPUT
-                       ${CMAKE_SOURCE_DIR}/patches/patches.bin
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/patches.c
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/recomp_overlays.inl
-                       ${CMAKE_SOURCE_DIR}/RecompiledPatches/funcs.h
-                   # TODO: Look into why modifying patches requires two builds to take
-                   COMMAND ./N64Recomp patches.toml
-                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-                   DEPENDS ${CMAKE_SOURCE_DIR}/patches/patches.elf
-)
 
 # Main executable
 add_executable(MarioKart64Recompiled)
@@ -353,7 +364,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif()
 
 target_link_libraries(MarioKart64Recompiled PRIVATE
-    PatchesLib
     RecompiledFuncs
     librecomp
     ultramodern
@@ -363,6 +373,9 @@ target_link_libraries(MarioKart64Recompiled PRIVATE
     nfd
     lunasvg
 )
+if (NOT RECOMP_DISABLE_PATCHES)
+    target_link_libraries(MarioKart64Recompiled PRIVATE PatchesLib)
+endif()
 
 # TODO fix the rt64 CMake script so that this doesn't need to be duplicated here
 # For DXC

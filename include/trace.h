@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #ifndef RECOMP_TRACE
-#define RECOMP_TRACE 0  // Was 1 - veroorzaakte massive performance overhead!
+#define RECOMP_TRACE 1
 #endif
 
 static inline FILE* recomp_trace_log_file() {

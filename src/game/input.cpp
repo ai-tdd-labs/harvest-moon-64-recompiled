@@ -1,5 +1,7 @@
 #include <atomic>
 #include <mutex>
+#include <string>
+#include <vector>
 
 #include "ultramodern/ultramodern.hpp"
 #include "recomp.h"
@@ -9,6 +11,12 @@
 #include "SDL.h"
 #include "promptfont.h"
 #include "GamepadMotion.hpp"
+
+// Avoid including librecomp headers here; only forward-declare what we need.
+namespace recomp {
+bool load_stored_rom(std::u8string& game_id);
+void start_game(const std::u8string& game_id);
+}
 
 constexpr float axis_threshold = 0.5f;
 
@@ -291,6 +299,32 @@ bool sdl_event_filter(void* userdata, SDL_Event* event) {
     case SDL_EventType::SDL_CONTROLLERBUTTONUP:
         // Always queue button up events to avoid missing them during binding.
         recompui::queue_event(*event);
+        break;
+    case SDL_EventType::SDL_USEREVENT:
+        // Autostart: posted by SDL timer callback, must be handled on main thread.
+        if (event->user.code == recomp::RECOMP_AUTOSTART_EVENT_CODE) {
+            fprintf(stderr, "[hm64_mk64base] autostart event received\n");
+            fflush(stderr);
+
+            if (!ultramodern::is_game_started()) {
+                const char8_t* game_id_cstr = reinterpret_cast<const char8_t*>(event->user.data1);
+                if (game_id_cstr == nullptr) {
+                    fprintf(stderr, "[hm64_mk64base] autostart skipped: missing game_id\n");
+                    fflush(stderr);
+                    break;
+                }
+                std::u8string game_id{ game_id_cstr };
+                if (!recomp::load_stored_rom(game_id)) {
+                    fprintf(stderr, "[hm64_mk64base] autostart skipped: no stored ROM loaded\n");
+                    fflush(stderr);
+                    break;
+                }
+                recomp::start_game(game_id);
+                recompui::hide_all_contexts();
+            }
+            break;
+        }
+        queue_if_enabled(event);
         break;
     default:
         queue_if_enabled(event);

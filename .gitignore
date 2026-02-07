@@ -78,3 +78,6 @@ gamecontrollerdb.txt
 
 # Controller pak saves
 *.sav
+
+# Leftover local backup from a failed submodule checkout
+MarioKart64RecompSyms.untracked.*/

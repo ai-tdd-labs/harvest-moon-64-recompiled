@@ -18,7 +18,8 @@ CPPFLAGS := -nostdinc -DTARGET_N64 -DF3DEX_GBI -D_LANGUAGE_C -DMIPS \
 
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
 
-C_SRCS := $(wildcard *.c)
+# Only compile HM64-specific patches (exclude MK64 patchset).
+C_SRCS := stub.c
 C_OBJS := $(C_SRCS:.c=.o)
 C_DEPS := $(C_SRCS:.c=.d)
 
