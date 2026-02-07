@@ -5,6 +5,7 @@
 #include "zelda_config.h"
 #include "recomp_input.h"
 #include "recomp_ui.h"
+#include "trace.h"
 #include "zelda_render.h"
 #include "zelda_sound.h"
 #include "librecomp/helpers.hpp"
@@ -43,6 +44,39 @@ extern "C" void recomp_puts(uint8_t* rdram, recomp_context* ctx) {
 
     for (u32 i = 0; i < length; i++) {
         fputc(MEM_B(i, (gpr)cur_str), stdout);
+    }
+}
+
+extern "C" void recomp_debug_u32(uint8_t* rdram, recomp_context* ctx) {
+    u32 tag = _arg<0, u32>(rdram, ctx);
+    u32 value = _arg<1, u32>(rdram, ctx);
+    FILE* file = recomp_trace_log_file();
+    if (file != NULL) {
+        fprintf(file, "[patch] tag=0x%08X value=0x%08X\n", tag, value);
+    }
+    fprintf(stderr, "[patch] tag=0x%08X value=0x%08X\n", tag, value);
+}
+
+extern "C" void recomp_debug_log_ptrs(const char* tag, uint8_t* rdram, recomp_context* ctx) {
+    FILE* file = recomp_trace_log_file();
+    if (file == NULL) {
+        return;
+    }
+
+    // Keep it simple: pointers only. Avoid dereferencing ctx/rdram to keep this safe even in bad states.
+    fprintf(file, "[dbg] %s rdram=%p ctx=%p\n", tag ? tag : "(null)", (void*)rdram, (void*)ctx);
+    fflush(file);
+}
+
+extern "C" void bzero_recomp(uint8_t* rdram, recomp_context* ctx) {
+    u32 addr = _arg<0, u32>(rdram, ctx);
+    u32 size = _arg<1, u32>(rdram, ctx);
+
+    if (addr >= 0x80000000 && addr < 0x80800000 && size < 0x800000) {
+        uint8_t* ptr = rdram + (addr - 0x80000000);
+        for (u32 i = 0; i < size; i++) {
+            ptr[i] = 0;
+        }
     }
 }
 

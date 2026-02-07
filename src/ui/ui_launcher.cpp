@@ -2,9 +2,11 @@
 #include "zelda_config.h"
 #include "zelda_support.h"
 #include "librecomp/game.hpp"
+#include "recomp_input.h"
 #include "ultramodern/ultramodern.hpp"
 #include "RmlUi/Core.h"
 #include "nfd.h"
+#include "SDL.h"
 #include <filesystem>
 
 static std::string version_string;
@@ -13,6 +15,26 @@ Rml::DataModelHandle model_handle;
 bool mm_rom_valid = false;
 
 extern std::vector<recomp::GameEntry> supported_games;
+
+// Auto-start: mirror BanjoRecomp's behavior (SDL timer -> SDL_USEREVENT -> start_game on main thread).
+static bool hm64_autostart_scheduled = false;
+static std::u8string hm64_autostart_game_id;
+
+static Uint32 hm64_autostart_timer_callback(Uint32 interval, void* param) {
+    (void)interval;
+    (void)param;
+    fprintf(stderr, "[hm64_mk64base] autostart timer fired\n");
+    fflush(stderr);
+
+    SDL_Event event;
+    SDL_zero(event);
+    event.type = SDL_USEREVENT;
+    event.user.code = recomp::RECOMP_AUTOSTART_EVENT_CODE;
+    event.user.data1 = (void*)hm64_autostart_game_id.c_str();
+    event.user.data2 = nullptr;
+    SDL_PushEvent(&event);
+    return 0;
+}
 
 void select_rom() {
     nfdnchar_t* native_path = nullptr;
@@ -79,7 +101,14 @@ public:
         );
         recompui::register_event(listener, "start_game",
             [](const std::string& param, Rml::Event& event) {
-                recomp::start_game(supported_games[0].game_id);
+                // Make "Start game" robust even if the ROM was just selected in this session:
+                // load the stored ROM into memory first, and fail gracefully if it's missing.
+                std::u8string game_id = supported_games[0].game_id;
+                if (!recomp::load_stored_rom(game_id)) {
+                    recompui::message_box("No valid stored ROM found. Please select a ROM first.");
+                    return;
+                }
+                recomp::start_game(game_id);
                 recompui::hide_all_contexts();
             }
         );
@@ -119,6 +148,33 @@ public:
         constructor.Bind("version_number", &version_string);
 
         model_handle = constructor.GetModelHandle();
+
+        // Schedule autostart after the launcher UI is initialized.
+        // Default: enabled, 4 seconds delay. Disable with RECOMP_AUTOSTART=0.
+        if (!hm64_autostart_scheduled && !supported_games.empty()) {
+            const char* autostart_env = std::getenv("RECOMP_AUTOSTART");
+            bool autostart_enabled = true;
+            if (autostart_env != nullptr && autostart_env[0] != '\0') {
+                autostart_enabled = (autostart_env[0] != '0');
+            }
+
+            int delay_ms = 4000;
+            const char* delay_env = std::getenv("RECOMP_AUTOSTART_DELAY_MS");
+            if (delay_env != nullptr && delay_env[0] != '\0') {
+                int parsed = std::atoi(delay_env);
+                if (parsed >= 0) {
+                    delay_ms = parsed;
+                }
+            }
+
+            if (autostart_enabled) {
+                hm64_autostart_scheduled = true;
+                hm64_autostart_game_id = supported_games[0].game_id;
+                SDL_AddTimer((Uint32)delay_ms, hm64_autostart_timer_callback, nullptr);
+                fprintf(stderr, "[hm64_mk64base] autostart scheduled in %dms\n", delay_ms);
+                fflush(stderr);
+            }
+        }
     }
 };
 

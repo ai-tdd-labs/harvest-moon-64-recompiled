@@ -8,6 +8,15 @@ RECOMP_EXPORT void hm64_patch_init(void) {
 
 // Extern declaration for yield function from N64ModernRuntime
 extern void yield_self_1ms(void);
+static volatile u32 nuGfxTaskAllEndWait_debug_counter = 0;
+
+// @recomp Replace busy-wait with yield loop to prevent hang
+RECOMP_PATCH void nuGfxTaskAllEndWait(void) {
+    // Use hardcoded pointer - extern symbols don't resolve correctly in patches
+    volatile u32* nuGfxTaskSpool = (volatile u32*)0x801FB5C0;
+    // Hard override: clear the spool and return immediately to avoid hang.
+    *nuGfxTaskSpool = 0;
+}
 
 // Extern declaration for VI black control from N64ModernRuntime
 // osViBlack_recomp is defined in syms.ld -> 0x8F0000EC

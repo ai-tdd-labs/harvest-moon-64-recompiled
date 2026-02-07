@@ -9,7 +9,8 @@ CFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -m
 CPPFLAGS := -nostdinc -DTARGET_N64 -DF3DEX_GBI -DF3D_OLD -D_LANGUAGE_C -DMIPS -I dummy_headers -I ../lib/mk64/include -I ../lib/mk64/include/PR -I ../lib/mk64/include/libc -I ../lib/mk64/src -I ../lib/mk64/assets -I../lib/rt64/include
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
 
-C_SRCS := $(wildcard *.c)
+# Only compile HM64-specific patches (exclude MK64 patchset).
+C_SRCS := stub.c
 C_OBJS := $(C_SRCS:.c=.o)
 C_DEPS := $(C_SRCS:.c=.d)
 

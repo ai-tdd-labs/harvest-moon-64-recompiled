@@ -106,6 +106,7 @@ f32 __cosf(f32);
 float sqrtf(float f);
 void Game_InitFullViewport(void);
 void* memcpy2(void* s1, const void* s2, size_t n);
+void recomp_debug_u32(u32 tag, u32 value);
 
 #define INCBIN(identifier, filename)          \
     asm(".pushsection .rodata\n"              \

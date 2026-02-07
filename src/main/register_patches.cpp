@@ -1,4 +1,9 @@
 #include "ovl_patches.hpp"
+
+#if defined(RECOMP_DISABLE_PATCHES)
+void zelda64::register_patches() {
+}
+#else
 #include "../../RecompiledPatches/patches_bin.h"
 #include "../../RecompiledPatches/recomp_overlays.inl"
 
@@ -11,3 +16,4 @@ void zelda64::register_patches() {
     recomp::overlays::register_base_events(event_names);
     recomp::overlays::register_manual_patch_symbols(manual_patch_symbols);
 }
+#endif

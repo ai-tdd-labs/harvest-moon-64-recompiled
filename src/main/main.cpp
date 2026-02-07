@@ -3,6 +3,7 @@
 #include <unordered_map>
 #include <vector>
 #include <array>
+#include <chrono>
 #include <filesystem>
 #include <numeric>
 #include <stdexcept>
@@ -352,10 +353,10 @@ gpr get_entrypoint_address();
 // array of supported GameEntry objects
 std::vector<recomp::GameEntry> supported_games = {
     {
-        .rom_hash = 0x54572403569b87c1, // retail
-        .internal_name = "MARIOKART64",
-        .game_id = u8"mk64.us",
-        .mod_game_id = "mk64",
+        .rom_hash = 0x68B2C3755C527305, // HM64 US
+        .internal_name = "HARVESTMOON64",
+        .game_id = u8"hm64.n64.us.1.0",
+        .mod_game_id = "hm64",
         .save_type = recomp::SaveType::Eep4k,
         .is_enabled = true,
         .entrypoint_address = get_entrypoint_address(),

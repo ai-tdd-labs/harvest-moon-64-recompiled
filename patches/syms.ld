@@ -72,3 +72,6 @@ recomp_set_bgm_volume_0 = 0x8F0000F0;
 osPfsFindFile_recomp = 0x8F0000F4;
 osPfsReadWriteFile_recomp = 0x8F0000F8;
 osPfsDeleteFile_recomp = 0x8F0000FC;
+yield_self_1ms = 0x8F000100;
+osViBlack_recomp = 0x8F000104;
+recomp_debug_u32 = 0x8F000108;

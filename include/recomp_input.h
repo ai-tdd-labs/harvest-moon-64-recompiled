@@ -164,6 +164,10 @@ namespace recomp {
     void update_rumble();
     void handle_events();
 
+    // Custom SDL_USEREVENT code used for project-specific actions posted from SDL timer callbacks.
+    // Keep this high to avoid collisions with other user.code uses (e.g. controller axis ids).
+    constexpr int RECOMP_AUTOSTART_EVENT_CODE = 0x1000;
+
     ultramodern::input::connected_device_info_t get_connected_device_info(int controller_num);
     
     // Rumble strength ranges from 0 to 100.
