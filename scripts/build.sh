@@ -3,6 +3,5 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-# Build the current macOS app target (name comes from the mk64 base scaffold).
-cmake --build build --target MarioKart64Recompiled -j"$(sysctl -n hw.ncpu)"
-
+# Build the current macOS app target.
+cmake --build build --target HarvestMoon64Recompiled -j"$(sysctl -n hw.ncpu)"

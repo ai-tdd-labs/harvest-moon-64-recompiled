@@ -145,7 +145,7 @@ ultramodern::renderer::WindowHandle create_window(ultramodern::gfx_callbacks_t::
     flags |= SDL_WINDOW_VULKAN;
 #endif
 
-    window = SDL_CreateWindow("MarioKart 64: Recompiled", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
+    window = SDL_CreateWindow(zelda64::program_name.data(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1600, 960,  flags);
 #if defined(__linux__)
     SetImageAsIcon("icons/512.png",window);
     if (ultramodern::renderer::get_graphics_config().wm_option == ultramodern::renderer::WindowMode::Fullscreen) { // TODO: Remove once RT64 gets native fullscreen support on Linux
@@ -220,7 +220,7 @@ void queue_samples(int16_t* audio_data, size_t sample_count) {
     // swap buffer to correct for the address xor caused by endianness handling.
     float cur_main_volume = zelda64::get_main_volume() / 100.0f; // Get the current main volume, normalized to 0.0-1.0.
     for (size_t i = 0; i < sample_count; i += input_channels) {
-        // TODO: Don't swap buffers since the channels are reversed in MK64 for some reason
+        // TODO(scaffold): The original MK64 scaffold had a channel swap quirk; verify HM64 behavior.
         // Investigate
         swap_buffer[i + 0 + duplicated_input_frames * input_channels] = audio_data[i + 0] * (1.0f / 32768.0f) * cur_main_volume;
         swap_buffer[i + 1 + duplicated_input_frames * input_channels] = audio_data[i + 1] * (1.0f / 32768.0f) * cur_main_volume;
@@ -643,7 +643,7 @@ int main(int argc, char** argv) {
 
     //recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
 
-    // MK64 patch exports - disabled for HM64 (add HM64-specific exports later)
+    // Scaffold patch exports - disabled for HM64 (add HM64-specific exports later)
     // REGISTER_FUNC(recomp_get_window_resolution);
     // REGISTER_FUNC(recomp_get_aspect_ratio);
     // REGISTER_FUNC(recomp_get_target_framerate);

@@ -29,7 +29,6 @@ One of the goals of this repo is to explore setting up and iterating on N64 reco
 - Main blocker (not playable yet):
   - Visible framebuffer flickering (sync issue).
   - Controller input not working (NuSystem scheduler/input path still missing).
-- Note: the app/binary target name is still inherited from the MK64 scaffold (`MarioKart64Recompiled`).
 
 ## Quick Start (macOS)
 
@@ -42,11 +41,11 @@ One of the goals of this repo is to explore setting up and iterating on N64 reco
    - `../N64Recomp/build/N64Recomp hm64.us.toml`
 4. Configure and build:
    - `cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release`
-   - `cmake --build build --target MarioKart64Recompiled -j$(sysctl -n hw.ncpu)`
+   - `cmake --build build --target HarvestMoon64Recompiled -j$(sysctl -n hw.ncpu)`
 5. Run:
-   - `./build/MarioKart64Recompiled.app/Contents/MacOS/MarioKart64Recompiled`
+   - `./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled`
 
 ## Notes
 
-- The app/binary target name is still inherited from the MK64 scaffold (`MarioKart64Recompiled`). Renaming will happen once the HM64 conversion stabilizes.
+- App/binary target name: `HarvestMoon64Recompiled`.
 - For more build details, see `BUILDING.md`.

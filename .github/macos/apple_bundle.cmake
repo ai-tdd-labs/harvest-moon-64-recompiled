@@ -2,10 +2,10 @@
 set(ENTITLEMENTS_FILE ${CMAKE_SOURCE_DIR}/.github/macos/entitlements.plist)
 
 # Set bundle properties
-set_target_properties(MarioKart64Recompiled PROPERTIES
+set_target_properties(HarvestMoon64Recompiled PROPERTIES
         MACOSX_BUNDLE TRUE
-        MACOSX_BUNDLE_BUNDLE_NAME "MarioKart64Recompiled"
-        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.mariokart64recompiled"
+        MACOSX_BUNDLE_BUNDLE_NAME "HarvestMoon64Recompiled"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.github.aitddlabs.harvestmoon64recompiled"
         MACOSX_BUNDLE_BUNDLE_VERSION "1.0"
         MACOSX_BUNDLE_SHORT_VERSION_STRING "1.0"
         MACOSX_BUNDLE_ICON_FILE "AppIcon.icns"
@@ -46,16 +46,16 @@ set_source_files_properties(${ICNS_FILE} PROPERTIES
 )
 
 # Add the icns file to the executable target
-target_sources(MarioKart64Recompiled PRIVATE ${ICNS_FILE})
+target_sources(HarvestMoon64Recompiled PRIVATE ${ICNS_FILE})
 
-# Ensure MarioKart64Recompiled depends on create_icns
-add_dependencies(MarioKart64Recompiled create_icns)
+# Ensure HarvestMoon64Recompiled depends on create_icns
+add_dependencies(HarvestMoon64Recompiled create_icns)
 
 # Configure Info.plist
 configure_file(${CMAKE_SOURCE_DIR}/.github/macos/Info.plist.in ${CMAKE_BINARY_DIR}/Info.plist @ONLY)
 
 # Install the app bundle
-install(TARGETS MarioKart64Recompiled BUNDLE DESTINATION .)
+install(TARGETS HarvestMoon64Recompiled BUNDLE DESTINATION .)
 
 # Ensure the entitlements file exists
 if(NOT EXISTS ${ENTITLEMENTS_FILE})
@@ -63,24 +63,24 @@ if(NOT EXISTS ${ENTITLEMENTS_FILE})
 endif()
 
 # Post-build steps for macOS bundle
-add_custom_command(TARGET MarioKart64Recompiled POST_BUILD
+add_custom_command(TARGET HarvestMoon64Recompiled POST_BUILD
     # Copy and fix frameworks first
     COMMAND ${CMAKE_COMMAND} -D CMAKE_BUILD_TYPE=$<CONFIG> -D CMAKE_GENERATOR=${CMAKE_GENERATOR} -P ${CMAKE_SOURCE_DIR}/.github/macos/fixup_bundle.cmake
 
     # Copy all resources
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/assets ${CMAKE_BINARY_DIR}/temp_assets
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/temp_assets/scss
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/temp_assets $<TARGET_BUNDLE_DIR:MarioKart64Recompiled>/Contents/Resources/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_BINARY_DIR}/temp_assets $<TARGET_BUNDLE_DIR:HarvestMoon64Recompiled>/Contents/Resources/assets
     COMMAND ${CMAKE_COMMAND} -E remove_directory ${CMAKE_BINARY_DIR}/temp_assets
 
     # Copy controller database
-    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/recompcontrollerdb.txt $<TARGET_BUNDLE_DIR:MarioKart64Recompiled>/Contents/Resources/
+    COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/recompcontrollerdb.txt $<TARGET_BUNDLE_DIR:HarvestMoon64Recompiled>/Contents/Resources/
 
     # Set RPATH
-    COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks/" $<TARGET_BUNDLE_DIR:MarioKart64Recompiled>/Contents/MacOS/MarioKart64Recompiled
+    COMMAND install_name_tool -add_rpath "@executable_path/../Frameworks/" $<TARGET_BUNDLE_DIR:HarvestMoon64Recompiled>/Contents/MacOS/HarvestMoon64Recompiled
 
     # Sign the bundle
-    COMMAND codesign --verbose=4 --options=runtime --no-strict --sign - --entitlements ${ENTITLEMENTS_FILE} --deep --force $<TARGET_BUNDLE_DIR:MarioKart64Recompiled>
+    COMMAND codesign --verbose=4 --options=runtime --no-strict --sign - --entitlements ${ENTITLEMENTS_FILE} --deep --force $<TARGET_BUNDLE_DIR:HarvestMoon64Recompiled>
 
     COMMENT "Performing post-build steps for macOS bundle"
     VERBATIM

@@ -23,7 +23,7 @@ static std::u8string hm64_autostart_game_id;
 static Uint32 hm64_autostart_timer_callback(Uint32 interval, void* param) {
     (void)interval;
     (void)param;
-    fprintf(stderr, "[hm64_mk64base] autostart timer fired\n");
+    fprintf(stderr, "[hm64] autostart timer fired\n");
     fflush(stderr);
 
     SDL_Event event;
@@ -171,7 +171,7 @@ public:
                 hm64_autostart_scheduled = true;
                 hm64_autostart_game_id = supported_games[0].game_id;
                 SDL_AddTimer((Uint32)delay_ms, hm64_autostart_timer_callback, nullptr);
-                fprintf(stderr, "[hm64_mk64base] autostart scheduled in %dms\n", delay_ms);
+                fprintf(stderr, "[hm64] autostart scheduled in %dms\n", delay_ms);
                 fflush(stderr);
             }
         }
