@@ -9,6 +9,9 @@
 # Local-only ROM/ELF directory
 roms/
 
+# Temporary local scratch
+tmp/
+
 # Output C files
 RecompiledFuncs/
 RecompiledPatches/
