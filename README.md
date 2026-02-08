@@ -1,29 +1,21 @@
-# MarioKart 64: Recompiled
-MarioKart 64: Recompiled is a project that uses [N64: Recompiled](https://github.com/Mr-Wiseguy/N64Recomp) to **statically recompile** MarioKart 64 into a native port with many new features and enhancements. This project uses [RT64](https://github.com/rt64/rt64) as the rendering engine to provide some of these enhancements.
+# Harvest Moon 64: Recompiled (WIP)
+This is a work-in-progress static recompilation project for Harvest Moon 64 built on the N64: Recompiled modern runtime.
 
-### [Download the latest release here](https://github.com/sonicdcer/MarioKart64Recomp/releases/latest).
+This repository does not contain ROMs, ELFs, or extracted game assets. You must provide your own copy of the game to build or run.
 
-Join the [N64: Recompiled Community Discord](https://discord.gg/AWZThJ4dPf) to discuss this and other N64: Recompiled projects!
+## Quick Start (macOS)
+1. Put your local files in `roms/` (see `roms/README.md`).
+2. Generate recompiled code:
+   - `../N64Recomp/build/N64Recomp hm64.us.toml`
+3. Configure and build:
+   - `cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release`
+   - `cmake --build build --target MarioKart64Recompiled -j$(sysctl -n hw.ncpu)`
+4. Run:
+   - `./build/MarioKart64Recompiled.app/Contents/MacOS/MarioKart64Recompiled`
 
-[![Discord Invitation](https://discordapp.com/api/guilds/1374083583739826328/widget.png?style=banner2 'N64 Recomp')](https://discord.gg/AWZThJ4dPf)
-
-### **This repository and its releases do not contain game assets. The original game is required to build or run this project.**
-
-## Table of Contents
-* [System Requirements](#system-requirements)
-* [Features](#features)
-  * [Plug and Play](#plug-and-play)
-  * [Fully Intact N64 Effects](#fully-intact-n64-effects)
-  * [Easy-to-Use Menus](#easy-to-use-menus)
-  * [High Framerate Support](#high-framerate-support)
-  * [Widescreen and Ultrawide Support](#widescreen-and-ultrawide-support)
-  * [Low Input Lag](#low-input-lag)
-  * [Linux and Steam Deck Support](#linux-and-steam-deck-support)
-* [Planned Features](#planned-features)
-* [FAQ](#faq)
-* [Known Issues](#known-issues)
-* [Building](#building)
-* [Libraries Used and Projects Referenced](#libraries-used-and-projects-referenced)
+## Notes
+- The app/binary target name is still inherited from the MK64 base scaffold (`MarioKart64Recompiled`) and will be renamed once the HM64 project structure stabilizes.
+- For full build notes, see `BUILDING.md`.
 
 ## System Requirements
 A GPU supporting Direct3D 12.0 (Shader Model 6), Vulkan 1.2, or Metal Argument Buffers Tier 2 support is required to run this project. The oldest GPUs that should be supported for each vendor are:
@@ -36,7 +28,7 @@ On x86-64 PCs, a CPU supporting the SSE4.1 instruction set is also required (Int
 
 If you have issues with crashes on startup, make sure your graphics drivers are fully up to date. 
 
-## Features
+## Upstream Features (inherited from the base)
 
 #### Plug and Play
 Simply provide your copy of the North American version of the game in the main menu and start playing! This project will automatically load assets from the provided copy, so there is no need to go through a separate extraction step or build the game yourself.
@@ -91,10 +83,8 @@ Unlike N64 ports in the past, this project is not based on the source code provi
 - Linux: `~/.config/MarioKart64Recompiled/saves`
 - macOS: `~/Library/Application Support/MarioKart64Recompiled/saves`
 
-#### How do I choose a different ROM?
-**You don't.** This project is **only** a port of MarioKart 64, and it will only accept one specific ROM: the US version of the N64 release of MarioKart 64. ROMs in formats other than .z64 will be automatically converted, as long as it is the correct ROM. **It is not an emulator and it cannot run any arbitrary ROM.** 
-
-Instead, you can change the game by installing mods. See the [mod support](#mod-support) section for details.
+#### Where do I put my ROM / ELF?
+Put them in `roms/` and keep them local-only (see `roms/README.md`).
 
 #### Can you run this project as a portable application?
 Yes, if you place a file named `portable.txt` in the same folder as the executable then this project will run in portable mode. In portable mode, the save files, config files, and mods are placed in the same folder as the executable.
@@ -110,13 +100,5 @@ If you want to play a modded ROM or in another language, note that support for m
 Building is not required to play this project, as prebuilt binaries (which do not contain game assets) can be found in the [Releases](https://github.com/sonicdcer/MarioKart64Recomp/releases/latest) section. Instructions on how to build this project can be found in the [BUILDING.md](BUILDING.md) file.
 
 ## Libraries Used and Projects Referenced
-* [RT64](https://github.com/rt64/rt64) for the project's rendering engine
-* [RmlUi](https://github.com/mikke89/RmlUi) for building the menus and launcher
-* [lunasvg](https://github.com/sammycage/lunasvg) for SVG rendering, used by RmlUi
-* [FreeType](https://freetype.org/) for font rendering, used by RmlUi  
-* [moodycamel::ConcurrentQueue](https://github.com/cameron314/concurrentqueue) for semaphores and fast, lock-free MPMC queues
-* [Gamepad Motion Helpers](https://github.com/JibbSmart/GamepadMotionHelpers) for sensor fusion and calibration algorithms to implement gyro aiming
-* [MarioKart 64 Decompilation](https://github.com/n64decomp/mk64) for headers and some function definitions, used for making patches or some enhancements
-* [Ares emulator](https://github.com/ares-emulator/ares) for RSP vector instruction reference implementations, used in RSP recompilation
-
-Special thanks to [thecozies](https://github.com/thecozies) for designing and helping implement the launcher and config menus!
+- N64: Recompiled modern runtime (via submodules)
+- RT64, RmlUi, FreeType, lunasvg, and other third-party dependencies (via submodules)

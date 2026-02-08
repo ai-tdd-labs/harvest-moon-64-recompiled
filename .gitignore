@@ -8,6 +8,10 @@
 *.z64
 *.map
 
+# Local-only ROM/ELF directory. Allow the README so the folder exists in git.
+roms/*
+!roms/README.md
+
 # Output C files
 RecompiledFuncs/
 RecompiledPatches/
