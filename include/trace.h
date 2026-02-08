@@ -14,7 +14,7 @@ static inline FILE* recomp_trace_log_file() {
     if (!initialized) {
         const char* path = getenv("RECOMP_TRACE_LOG");
         if (path == NULL || *path == '\0') {
-            path = "/tmp/hm64_mk64base_trace.log";
+            path = "/tmp/hm64_trace.log";
         }
         file = fopen(path, "a");
         if (file != NULL) {

@@ -2,6 +2,8 @@
 
 This project is a work-in-progress and is still being converted from the `MarioKart64Recomp` scaffold to Harvest Moon 64.
 
+Note: `MarioKart64Recomp` is used as the build/runtime scaffold. Game-specific code generation is driven by `hm64.us.toml`.
+
 This repository does not include ROMs, ELFs, or extracted game assets.
 
 ## 1. Clone
@@ -63,11 +65,11 @@ If you modify audio microcode in `rsp/`, rebuild it with:
 
 ```bash
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build --target MarioKart64Recompiled -j$(sysctl -n hw.ncpu)
+cmake --build build --target HarvestMoon64Recompiled -j$(sysctl -n hw.ncpu)
 ```
 
 ## 6. Run
 
 ```bash
-./build/MarioKart64Recompiled.app/Contents/MacOS/MarioKart64Recompiled
+./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled
 ```

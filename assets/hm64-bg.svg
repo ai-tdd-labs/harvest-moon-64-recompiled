@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="860" height="194" viewBox="0 0 860 194">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0f2a3d"/>
+      <stop offset="1" stop-color="#2a5c4b"/>
+    </linearGradient>
+    <linearGradient id="hill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1a3f2f"/>
+      <stop offset="1" stop-color="#214b36"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="860" height="194" fill="url(#sky)"/>
+
+  <circle cx="705" cy="52" r="28" fill="#ffe5a8" opacity="0.95"/>
+  <circle cx="718" cy="44" r="24" fill="#ffd37a" opacity="0.55"/>
+
+  <path d="M0 150 C120 120, 250 180, 380 150 C520 120, 640 175, 860 135 L860 194 L0 194 Z" fill="url(#hill)" opacity="0.95"/>
+  <path d="M0 165 C160 140, 320 190, 520 165 C640 150, 750 175, 860 160 L860 194 L0 194 Z" fill="#173626" opacity="0.9"/>
+
+  <rect x="54" y="46" width="6" height="62" fill="#4c2f1e" opacity="0.95"/>
+  <circle cx="57" cy="40" r="16" fill="#2f6b3e" opacity="0.95"/>
+  <circle cx="46" cy="52" r="10" fill="#2a5f37" opacity="0.95"/>
+  <circle cx="68" cy="54" r="11" fill="#2a5f37" opacity="0.95"/>
+
+  <g opacity="0.85">
+    <rect x="118" y="64" width="5" height="44" fill="#4c2f1e"/>
+    <circle cx="120" cy="58" r="12" fill="#2f6b3e"/>
+  </g>
+
+  <g opacity="0.9">
+    <rect x="140" y="88" width="520" height="44" rx="10" fill="#0b141b" opacity="0.35"/>
+    <text x="400" y="118" text-anchor="middle" font-family="sans-serif" font-size="24" fill="#f2f2f2" letter-spacing="1.2">HARVEST MOON 64</text>
+    <text x="400" y="142" text-anchor="middle" font-family="sans-serif" font-size="14" fill="#d7d7d7" letter-spacing="1.6">RECOMPILED</text>
+  </g>
+</svg>

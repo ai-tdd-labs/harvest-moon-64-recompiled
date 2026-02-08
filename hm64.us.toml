@@ -1,4 +1,4 @@
-# Config file for Harvest Moon 64 NTSC Recompilation (based on MK64 structure)
+# Config file for Harvest Moon 64 (US) recompilation (based on the N64: Recompiled scaffold).
 [input]
 entrypoint = 0x80025C00
 elf_path = "roms/hm64.elf"

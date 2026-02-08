@@ -5,8 +5,8 @@
     {
       "type": "default",
       "project": "CMakeLists.txt",
-      "projectTarget": "MarioKart64Recompiled.exe",
-      "name": "MarioKart64Recompiled.exe",
+      "projectTarget": "HarvestMoon64Recompiled.exe",
+      "name": "HarvestMoon64Recompiled.exe",
       "currentDir": "${workspaceRoot}"
     },
     {

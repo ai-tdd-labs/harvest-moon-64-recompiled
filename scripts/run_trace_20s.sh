@@ -3,9 +3,9 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-APP="./build/MarioKart64Recompiled.app/Contents/MacOS/MarioKart64Recompiled"
-TRACE_LOG="${RECOMP_TRACE_LOG:-/tmp/hm64_mk64base_trace.log}"
-RUN_LOG="${RUN_LOG:-/tmp/hm64_mk64base_run.log}"
+APP="./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled"
+TRACE_LOG="${RECOMP_TRACE_LOG:-/tmp/hm64_trace.log}"
+RUN_LOG="${RUN_LOG:-/tmp/hm64_run.log}"
 SECONDS_TO_RUN="${SECONDS_TO_RUN:-20}"
 
 rm -f "$TRACE_LOG" "$RUN_LOG"
