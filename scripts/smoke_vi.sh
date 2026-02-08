@@ -23,9 +23,14 @@ sleep 20
 kill "$PID" 2>/dev/null || true
 sleep 1
 
-SWAPS="$(rg -c "\\[hm64\\]\\[swap\\]" "$OUT" || true)"
-BLACK1="$(rg -c "osViBlack active=1" "$OUT" || true)"
-BLACK0="$(rg -c "osViBlack active=0" "$OUT" || true)"
+SWAPS="$(rg -c "\\[hm64\\]\\[swap\\]" "$OUT" 2>/dev/null || true)"
+BLACK1="$(rg -c "osViBlack active=1" "$OUT" 2>/dev/null || true)"
+BLACK0="$(rg -c "osViBlack active=0" "$OUT" 2>/dev/null || true)"
+
+# rg returns non-zero when it finds 0 matches; normalize empty -> 0 for arithmetic tests/logs.
+SWAPS="${SWAPS:-0}"
+BLACK1="${BLACK1:-0}"
+BLACK0="${BLACK0:-0}"
 
 echo "[smoke] swaps=$SWAPS vi_black_1=$BLACK1 vi_black_0=$BLACK0" >&2
 
@@ -41,4 +46,3 @@ if [[ "$SWAPS" -lt 1 ]]; then
 fi
 
 echo "[smoke] PASS" >&2
-
