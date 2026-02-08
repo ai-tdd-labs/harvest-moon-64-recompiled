@@ -9,9 +9,10 @@ This repo does not contain ROMs, ELFs, or extracted game assets. You must provid
 ## Current State
 
 - Boots with video and audio.
-- Not playable yet:
-  - Framebuffer flickering (sync issue).
+- Main blocker (not playable yet):
+  - Visible framebuffer flickering (sync issue).
   - Controller input not working (NuSystem scheduler/input path still missing).
+- Note: the app/binary target name is still inherited from the MK64 scaffold (`MarioKart64Recompiled`).
 
 ## Quick Start (macOS)
 
@@ -37,4 +38,3 @@ This repo does not contain ROMs, ELFs, or extracted game assets. You must provid
 
 - Built on the N64: Recompiled modern runtime (submodule `lib/N64ModernRuntime`).
 - Rendering uses RT64, UI uses RmlUi (submodules).
-
