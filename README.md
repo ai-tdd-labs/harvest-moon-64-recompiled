@@ -1,10 +1,16 @@
 # Harvest Moon 64: Recompiled (WIP)
 This is a work-in-progress static recompilation project for Harvest Moon 64 built on the N64: Recompiled modern runtime.
 
+It is currently based on the MarioKart64Recomp project scaffold, and the repository is still being converted and cleaned up.
+
 This repository does not contain ROMs, ELFs, or extracted game assets. You must provide your own copy of the game to build or run.
 
+## Status
+- Video + audio are working (game boots).
+- Known issues: visible framebuffer flickering and controller input not working yet (cannot play).
+
 ## Quick Start (macOS)
-1. Put your local files in `roms/` (see `roms/README.md`).
+1. Put your local files in `roms/` (local-only; do not commit).
 2. Generate recompiled code:
    - `../N64Recomp/build/N64Recomp hm64.us.toml`
 3. Configure and build:

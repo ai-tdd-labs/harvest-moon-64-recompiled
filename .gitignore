@@ -1,16 +1,13 @@
 # VSCode file settings
-.vscode/settings.json
-# .vscode/c_cpp_properties.json
-.vscode/launch.json
+.vscode/
 
 # Input elf and rom files
 *.elf
 *.z64
 *.map
 
-# Local-only ROM/ELF directory. Allow the README so the folder exists in git.
-roms/*
-!roms/README.md
+# Local-only ROM/ELF directory
+roms/
 
 # Output C files
 RecompiledFuncs/
@@ -89,6 +86,5 @@ notes/
 # Leftover local backup from a failed submodule checkout
 MarioKart64RecompSyms.untracked.*/
 
-# Local task tracker state (do not publish). Keep the directory, ignore contents.
-.beads/*
-!.beads/.gitkeep
+# Local task tracker state (do not publish)
+.beads/
