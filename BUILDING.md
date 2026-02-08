@@ -35,7 +35,7 @@ macOS (Apple Silicon) builds are supported using CMake + Ninja. You will need:
 
 - `cmake`
 - `ninja`
-- `llvm` (for the `patches/` MIPS build)
+- `llvm` (optional; only needed if you enable `patches/`)
 - `sdl2`
 
 Exact package names depend on your setup (Homebrew on macOS).
@@ -64,9 +64,12 @@ If you modify audio microcode in `rsp/`, rebuild it with:
 ## 5. Build (macOS)
 
 ```bash
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRECOMP_DISABLE_PATCHES=ON
 cmake --build build --target HarvestMoon64Recompiled -j$(sysctl -n hw.ncpu)
 ```
+
+If you previously configured with patches enabled, CMake will keep that cached. Re-run the
+configure command with `-DRECOMP_DISABLE_PATCHES=ON` (as above) to stop building `patches/`.
 
 ## 6. Run
 
