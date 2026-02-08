@@ -64,4 +64,4 @@ TRACE_RETURN();
 return;
 """
 
-## NOTE: func_80026284 yield hook intentionally removed during minimization iteration.
+## NOTE: nuGfxTaskAllEndWait yield-wait hook required to avoid black screen during init.
