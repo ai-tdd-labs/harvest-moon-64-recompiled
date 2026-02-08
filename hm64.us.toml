@@ -43,22 +43,10 @@ before_vram = 0x800FBF30
 text = """
 // nuGfxTaskSpool is at 0x801FB5C0 (see ELF symbol).
 // Yield so the graphics thread/scheduler can make progress.
-recomp_trace_entry("nuGfxTaskAllEndWait:force_clear_immediate");
-recomp_trace_entry("nuGfxTaskAllEndWait:before_store");
 // MEM_* macros expect a sign-extended KSEG0 address (0xFFFFFFFF8xxxxxxx).
 MEM_W(0, 0xFFFFFFFF801FB5C0ULL) = 0;
-recomp_trace_entry("nuGfxTaskAllEndWait:after_store");
-recomp_trace_entry("nuGfxTaskAllEndWait:exit");
 TRACE_RETURN();
 return;
-"""
-
-# Instrument func_80026284 (called early from mainLoop) to confirm whether rdram/ctx are valid.
-[[patches.hook]]
-func = "func_80026284"
-before_vram = 0x80026284
-text = """
-recomp_debug_log_ptrs("func_80026284:enter", rdram, ctx);
 """
 
 # Yield inside func_80026284's busy-wait on 0x80205208.
