@@ -15,7 +15,12 @@ echo "TRACE_LOG=$TRACE_LOG"
 echo "RUN_LOG=$RUN_LOG"
 echo "SECONDS_TO_RUN=$SECONDS_TO_RUN"
 
-RECOMP_TRACE_LOG="$TRACE_LOG" "$APP" >"$RUN_LOG" 2>&1 &
+# Trace can be extremely spammy; default to keeping it off unless explicitly enabled.
+if [[ "${TRACE_ENABLED:-0}" == "1" ]]; then
+  RECOMP_TRACE_LOG="$TRACE_LOG" "$APP" >"$RUN_LOG" 2>&1 &
+else
+  "$APP" >"$RUN_LOG" 2>&1 &
+fi
 pid=$!
 echo "pid=$pid"
 
@@ -29,4 +34,3 @@ echo "--- trace tail"
 tail -n 120 "$TRACE_LOG" || true
 echo "--- run tail"
 tail -n 120 "$RUN_LOG" || true
-
