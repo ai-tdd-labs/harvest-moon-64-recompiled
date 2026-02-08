@@ -82,5 +82,6 @@ gamecontrollerdb.txt
 # Leftover local backup from a failed submodule checkout
 MarioKart64RecompSyms.untracked.*/
 
-# Local task tracker state (do not publish)
-.beads/
+# Local task tracker state (do not publish). Keep the directory, ignore contents.
+.beads/*
+!.beads/.gitkeep
