@@ -20,6 +20,21 @@ ignored = [
 # Reset section parsing for simple test parser (before hooks).
 [patches.hook_config]
 
+# MegaMan64-style yield in stepMainLoop busy-wait
+# Reference: MegaMan64Recompiled/us.rev1.toml func_8008A02C_6542C
+# This prevents CPU spin-lock and allows graphics thread to run
+[[patches.hook]]
+func = "mainLoop"
+# Before the beq instruction in busy-wait loop
+before_vram = 0x80026058
+text = """
+// MEM_* macros expect a sign-extended KSEG0 base (0xFFFFFFFF8xxxxxxx).
+while (MEM_BU(0x5208, 0xFFFFFFFF80200000ULL) == 0) {
+    yield_self(rdram);
+}
+ctx->r2 = MEM_BU(0x5208, 0xFFFFFFFF80200000ULL);
+"""
+
 # Yield inside func_80026284's busy-wait on 0x80205208.
 # Without this, the main thread can spin forever before reaching the mainLoop yield patch.
 [[patches.hook]]

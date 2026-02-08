@@ -85,6 +85,8 @@ gamecontrollerdb.txt
 
 # Local notes (may contain absolute paths / private machine info)
 notes/
+!notes/
+!notes/vi-smoke-lessons.md
 
 # Leftover local backup from a failed submodule checkout
 MarioKart64RecompSyms.untracked.*/

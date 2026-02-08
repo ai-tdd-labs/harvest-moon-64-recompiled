@@ -572,6 +572,11 @@ void reorder_texture_pack(recomp::mods::ModContext&) {
 int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
+
+    // Ensure debug logs (including VI/swap smoke-test logs) are not lost when the process is terminated.
+    // This is especially important when redirecting stderr to a file (common in scripted repros).
+    setvbuf(stderr, nullptr, _IONBF, 0);
+
     recomp::Version project_version{};
     if (!recomp::Version::from_string(version_string, project_version)) {
         ultramodern::error_handling::message_box(("Invalid version string: " + version_string).c_str());
