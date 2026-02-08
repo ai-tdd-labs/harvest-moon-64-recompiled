@@ -35,6 +35,21 @@ while (MEM_BU(0x5208, 0xFFFFFFFF80200000ULL) == 0) {
 ctx->r2 = MEM_BU(0x5208, 0xFFFFFFFF80200000ULL);
 """
 
+# Prevent NuSystem init from starving other threads by yielding in nuGfxTaskAllEndWait.
+# This is a minimal semantic-preserving change: wait until nuGfxTaskSpool becomes 0, but yield while waiting.
+[[patches.hook]]
+func = "nuGfxTaskAllEndWait"
+before_vram = 0x800FBF30
+text = """
+// nuGfxTaskSpool is at 0x801FB5C0 (see ELF symbol).
+// MEM_* macros expect a sign-extended KSEG0 address (0xFFFFFFFF8xxxxxxx).
+while (MEM_W(0, 0xFFFFFFFF801FB5C0ULL) != 0) {
+    yield_self(rdram);
+}
+TRACE_RETURN();
+return;
+"""
+
 # Yield inside func_80026284's busy-wait on 0x80205208.
 # Without this, the main thread can spin forever before reaching the mainLoop yield patch.
 [[patches.hook]]
