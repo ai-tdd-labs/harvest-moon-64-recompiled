@@ -6,6 +6,13 @@ This repository is currently based on the `MarioKart64Recomp` scaffold and is st
 
 This repo does not contain ROMs, ELFs, or extracted game assets. You must provide your own legally obtained copy of the game.
 
+## Project Goal
+
+One of the goals of this repo is to explore setting up and iterating on N64 recompilation projects with the help of AI:
+
+- Quickly compare against reference recomp projects and reuse proven patterns.
+- Add targeted instrumentation (logs/trace/overlays) to debug black screens, hangs, and scheduler issues without guessing.
+
 ## Current State
 
 - Boots with video and audio.
