@@ -643,19 +643,20 @@ int main(int argc, char** argv) {
 
     //recomp::mods::register_embedded_mod("mm_recomp_dpad_builtin", { (const uint8_t*)(mm_recomp_dpad_builtin), std::size(mm_recomp_dpad_builtin)});
 
+    // MK64 patch exports - disabled for HM64 (add HM64-specific exports later)
     // REGISTER_FUNC(recomp_get_window_resolution);
-    REGISTER_FUNC(recomp_get_aspect_ratio);
-    REGISTER_FUNC(recomp_get_target_framerate);
+    // REGISTER_FUNC(recomp_get_aspect_ratio);
+    // REGISTER_FUNC(recomp_get_target_framerate);
     // REGISTER_FUNC(recomp_get_autosave_enabled);
     // REGISTER_FUNC(recomp_get_analog_cam_enabled);
-    REGISTER_FUNC(recomp_get_camera_inputs);
-    REGISTER_FUNC(recomp_get_targeting_mode);
-    REGISTER_FUNC(recomp_get_bgm_volume);
-    REGISTER_FUNC(recomp_get_low_health_beeps_enabled);
-    REGISTER_FUNC(recomp_get_gyro_deltas);
-    REGISTER_FUNC(recomp_get_mouse_deltas);
-    REGISTER_FUNC(recomp_get_inverted_axes);
-    REGISTER_FUNC(recomp_get_analog_inverted_axes);
+    // REGISTER_FUNC(recomp_get_camera_inputs);
+    // REGISTER_FUNC(recomp_get_targeting_mode);
+    // REGISTER_FUNC(recomp_get_bgm_volume);
+    // REGISTER_FUNC(recomp_get_low_health_beeps_enabled);
+    // REGISTER_FUNC(recomp_get_gyro_deltas);
+    // REGISTER_FUNC(recomp_get_mouse_deltas);
+    // REGISTER_FUNC(recomp_get_inverted_axes);
+    // REGISTER_FUNC(recomp_get_analog_inverted_axes);
     recompui::register_ui_exports();
     recomputil::register_data_api_exports();
 

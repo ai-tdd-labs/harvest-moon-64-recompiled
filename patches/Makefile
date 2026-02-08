@@ -10,10 +10,9 @@ CFLAGS   := -target mips -mips2 -mabi=32 -O2 -G0 -mno-abicalls -mno-odd-spreg -m
 
 # Include paths - using hm64-decomp headers
 CPPFLAGS := -nostdinc -DTARGET_N64 -DF3DEX_GBI -D_LANGUAGE_C -DMIPS \
-			-I dummy_headers \
-			-I ../../hm64-decomp/include \
-			-I ../../hm64-decomp/include/PR \
-			-I ../../hm64-decomp/include/libc \
+			-I ../lib/mk64/include \
+			-I ../lib/mk64/include/PR \
+			-I ../lib/mk64/include/libc \
 			-I ../lib/rt64/include
 
 LDFLAGS  := -nostdlib -T patches.ld -T syms.ld -Map patches.map --unresolved-symbols=ignore-all --emit-relocs
