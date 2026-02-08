@@ -18,6 +18,15 @@ If you already cloned without submodules:
 git submodule update --init --recursive
 ```
 
+If submodule init fails with an SSH error for `lib/mk64/tools/asm-processor`, you can force HTTPS:
+
+```bash
+cd lib/mk64
+git config submodule.tools/asm-processor.url https://github.com/simonlindholm/asm-processor.git
+git submodule update --init --recursive
+cd ../..
+```
+
 ## 2. Dependencies
 
 macOS (Apple Silicon) builds are supported using CMake + Ninja. You will need:
@@ -62,4 +71,3 @@ cmake --build build --target MarioKart64Recompiled -j$(sysctl -n hw.ncpu)
 ```bash
 ./build/MarioKart64Recompiled.app/Contents/MacOS/MarioKart64Recompiled
 ```
-
