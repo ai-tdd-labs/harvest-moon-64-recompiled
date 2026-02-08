@@ -2,9 +2,19 @@
 
 Work-in-progress static recompilation project for Harvest Moon 64.
 
-This repository is currently based on the `MarioKart64Recomp` scaffold and is still being converted and cleaned up.
+This repository is currently based on the Mario Kart 64 recompilation scaffold and is still being converted and cleaned up.
 
 This repo does not contain ROMs, ELFs, or extracted game assets. You must provide your own legally obtained copy of the game.
+
+## Attribution / Credits
+
+- Scaffold / upstream reference: [sonicdcer/MarioKart64Recomp](https://github.com/sonicdcer/MarioKart64Recomp) and its contributors.
+- Runtime/tooling: N64: Recompiled modern runtime + toolchain (submodule `lib/N64ModernRuntime` and `N64Recomp/` in this repo).
+- Rendering: RT64 (submodule).
+- UI: RmlUi (submodule).
+- Licensing: see `COPYING` and the license files in submodules.
+
+Note: GitHub's "Contributors" list may show upstream contributors due to the scaffold/history this repo is based on. That is expected and intentional attribution.
 
 ## Project Goal
 
@@ -40,8 +50,3 @@ One of the goals of this repo is to explore setting up and iterating on N64 reco
 
 - The app/binary target name is still inherited from the MK64 scaffold (`MarioKart64Recompiled`). Renaming will happen once the HM64 conversion stabilizes.
 - For more build details, see `BUILDING.md`.
-
-## Credits / Upstream
-
-- Built on the N64: Recompiled modern runtime (submodule `lib/N64ModernRuntime`).
-- Rendering uses RT64, UI uses RmlUi (submodules).
