@@ -57,6 +57,9 @@ bld/
 [Ll]ogs/
 out/
 
+# Do not ignore docs that happen to live under a directory named "debug".
+!docs/debug/
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 vcpkg_installed/
@@ -85,6 +88,8 @@ gamecontrollerdb.txt
 
 # Local notes (may contain absolute paths / private machine info)
 notes/
+
+# Docs are public; keep `docs/` tracked.
 
 # Leftover local backup from a failed submodule checkout
 MarioKart64RecompSyms.untracked.*/
