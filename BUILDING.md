@@ -73,3 +73,21 @@ cmake --build build --target HarvestMoon64Recompiled -j$(sysctl -n hw.ncpu)
 ```bash
 ./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled
 ```
+
+## Optional: Trace Logging
+
+Trace logging is disabled by default (to avoid performance issues and visual stutter).
+
+To enable it at build time:
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DRECOMP_ENABLE_TRACE=ON
+```
+
+To log to a file at runtime, set `RECOMP_TRACE_LOG` to a path:
+
+```bash
+RECOMP_TRACE_LOG=/tmp/hm64_trace.log ./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled
+```
+
+To log to stderr, set `RECOMP_TRACE_STDERR=1`.
