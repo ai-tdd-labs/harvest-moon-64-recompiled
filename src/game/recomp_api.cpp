@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cinttypes>
 
 #include "recomp.h"
 #include "librecomp/overlays.hpp"
@@ -14,6 +15,79 @@
 // #include "../patches/sound.h"
 #include "ultramodern/ultramodern.hpp"
 #include "ultramodern/config.hpp"
+
+static inline uint64_t fnv1a64_update(uint64_t h, uint8_t b) {
+    h ^= (uint64_t)b;
+    return h * 1099511628211ull;
+}
+
+static uint64_t fnv1a64_rdram_unswapped(uint8_t* rdram, uint32_t phys_addr, size_t len) {
+    uint64_t h = 1469598103934665603ull;
+    for (size_t i = 0; i < len; i++) {
+        // RDRAM is byte-swapped in the runtime; undo it for stable comparisons.
+        uint8_t b = rdram[(phys_addr + (uint32_t)i) ^ 3u];
+        h = fnv1a64_update(h, b);
+    }
+    return h;
+}
+
+static inline bool hm64_truthy(const char* name) {
+    return recomp_env_truthy(name) != 0;
+}
+
+static inline bool n64_to_phys(uint32_t n64_addr, uint32_t* phys_out) {
+    // Accept both raw physical and KSEG0/KSEG1 virtual addresses.
+    uint32_t phys = n64_addr;
+    if (n64_addr >= 0x80000000u) {
+        phys = n64_addr & 0x00FFFFFFu;
+    }
+    // HM64 uses 8MB RDRAM.
+    if (phys >= 0x00800000u) {
+        return false;
+    }
+    *phys_out = phys;
+    return true;
+}
+
+extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
+    if (!hm64_truthy("HM64_FB_HASH_LOG")) {
+        return;
+    }
+
+    static uint64_t seq = 0;
+    const uint64_t n = ++seq;
+
+    const uint32_t fb_addr = (uint32_t)ctx->r4;
+    uint32_t fb_phys = 0;
+    if (!n64_to_phys(fb_addr, &fb_phys)) {
+        fprintf(stderr, "[hm64][fbhash] #%llu fb=0x%08X phys=INVALID\n",
+            (unsigned long long)n, (unsigned)fb_addr);
+        return;
+    }
+
+    // Sample a few stripes within a typical 320x240x16b framebuffer region (0x25800 bytes).
+    // If the game uses a different layout, hashes may still be useful (they'll just include adjacent data).
+    constexpr uint32_t rdram_size = 0x00800000u;
+    constexpr uint32_t fb_guess_size = 0x00025800u;
+    constexpr size_t chunk = 4096;
+    const uint32_t max_safe = rdram_size - (uint32_t)chunk;
+
+    const uint32_t o0 = fb_phys;
+    const uint32_t o1 = (fb_phys + 0x00001000u <= max_safe) ? (fb_phys + 0x00001000u) : fb_phys;
+    const uint32_t o2 = (fb_phys + 0x00010000u <= max_safe) ? (fb_phys + 0x00010000u) : fb_phys;
+    const uint32_t o3 = (fb_phys + (fb_guess_size > chunk ? (fb_guess_size - (uint32_t)chunk) : 0u) <= max_safe)
+        ? (fb_phys + (fb_guess_size - (uint32_t)chunk))
+        : fb_phys;
+
+    uint64_t h0 = fnv1a64_rdram_unswapped(rdram, o0, chunk);
+    uint64_t h1 = fnv1a64_rdram_unswapped(rdram, o1, chunk);
+    uint64_t h2 = fnv1a64_rdram_unswapped(rdram, o2, chunk);
+    uint64_t h3 = fnv1a64_rdram_unswapped(rdram, o3, chunk);
+
+    fprintf(stderr,
+        "[hm64][fbhash] #%llu fb=0x%08X phys=0x%06X h=%016" PRIX64 ":%016" PRIX64 ":%016" PRIX64 ":%016" PRIX64 "\n",
+        (unsigned long long)n, (unsigned)fb_addr, (unsigned)fb_phys, h0, h1, h2, h3);
+}
 
 extern "C" void recomp_update_inputs(uint8_t* rdram, recomp_context* ctx) {
     recomp::poll_inputs();

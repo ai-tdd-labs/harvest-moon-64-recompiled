@@ -65,3 +65,15 @@ return;
 """
 
 ## NOTE: nuGfxTaskAllEndWait yield-wait hook required to avoid black screen during init.
+
+# Optional instrumentation: hash a few stripes of the framebuffer whenever NuSystem swaps it.
+# Enable with HM64_FB_HASH_LOG=1 (stderr).
+[[patches.hook]]
+func = "nuPakMenu"
+before_vram = 0x800F183C
+text = "recomp_fb_hash_tick(rdram, ctx);"
+
+[[patches.hook]]
+func = "nuGfxSwapCfb"
+before_vram = 0x800FBF20
+text = "recomp_fb_hash_tick(rdram, ctx);"
