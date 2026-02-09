@@ -1,5 +1,7 @@
 # Harvest Moon 64 PC Port / Recomp (WIP)
 
+Join the Discord: https://discord.gg/tugayjWw
+
 Work-in-progress static recompilation project for Harvest Moon 64.
 
 This repository is currently based on the Mario Kart 64 recompilation scaffold and is still being converted and cleaned up.
@@ -74,3 +76,7 @@ Tip: on macOS you can also double-click `Run-HM64-Recompiled.command` to open th
 
 - App/binary target name: `HarvestMoon64Recompiled`.
 - For more build details, see `BUILDING.md`.
+
+## Community / Discord
+
+Discord invite: https://discord.gg/tugayjWw
