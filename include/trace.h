@@ -4,7 +4,7 @@
 #include <stdlib.h>
 
 #ifndef RECOMP_TRACE
-#define RECOMP_TRACE 1
+#define RECOMP_TRACE 0
 #endif
 
 static inline FILE* recomp_trace_log_file() {
@@ -13,12 +13,11 @@ static inline FILE* recomp_trace_log_file() {
 
     if (!initialized) {
         const char* path = getenv("RECOMP_TRACE_LOG");
-        if (path == NULL || *path == '\0') {
-            path = "/tmp/hm64_trace.log";
-        }
-        file = fopen(path, "a");
-        if (file != NULL) {
-            setvbuf(file, NULL, _IOLBF, 0);
+        if (path != NULL && *path != '\0') {
+            file = fopen(path, "a");
+            if (file != NULL) {
+                setvbuf(file, NULL, _IOLBF, 0);
+            }
         }
         initialized = 1;
     }
@@ -26,13 +25,17 @@ static inline FILE* recomp_trace_log_file() {
     return file;
 }
 
+static inline int recomp_trace_stderr_enabled() {
+    const char* v = getenv("RECOMP_TRACE_STDERR");
+    return (v != NULL && *v != '\0' && v[0] != '0');
+}
+
 static inline void recomp_trace_entry(const char* func_name) {
     FILE* file = recomp_trace_log_file();
     if (file != NULL) {
         fprintf(file, "[trace] -> %s\n", func_name);
     }
-    const char* to_stderr = getenv("RECOMP_TRACE_STDERR");
-    if (to_stderr != NULL && to_stderr[0] != '\0' && to_stderr[0] != '0') {
+    if (recomp_trace_stderr_enabled()) {
         fprintf(stderr, "[trace] -> %s\n", func_name);
     }
 }
@@ -42,8 +45,7 @@ static inline void recomp_trace_return(const char* func_name) {
     if (file != NULL) {
         fprintf(file, "[trace] <- %s\n", func_name);
     }
-    const char* to_stderr = getenv("RECOMP_TRACE_STDERR");
-    if (to_stderr != NULL && to_stderr[0] != '\0' && to_stderr[0] != '0') {
+    if (recomp_trace_stderr_enabled()) {
         fprintf(stderr, "[trace] <- %s\n", func_name);
     }
 }
