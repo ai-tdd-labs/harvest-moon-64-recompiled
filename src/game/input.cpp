@@ -303,20 +303,28 @@ bool sdl_event_filter(void* userdata, SDL_Event* event) {
     case SDL_EventType::SDL_USEREVENT:
         // Autostart: posted by SDL timer callback, must be handled on main thread.
         if (event->user.code == recomp::RECOMP_AUTOSTART_EVENT_CODE) {
-            fprintf(stderr, "[hm64] autostart event received\n");
-            fflush(stderr);
+            const char* debug_autostart = std::getenv("HM64_AUTOSTART_DEBUG");
+            const bool debug_enabled = (debug_autostart != nullptr && debug_autostart[0] != '\0' && debug_autostart[0] != '0');
+            if (debug_enabled) {
+                fprintf(stderr, "[hm64] autostart event received\n");
+                fflush(stderr);
+            }
 
             if (!ultramodern::is_game_started()) {
                 const char8_t* game_id_cstr = reinterpret_cast<const char8_t*>(event->user.data1);
                 if (game_id_cstr == nullptr) {
-                    fprintf(stderr, "[hm64] autostart skipped: missing game_id\n");
-                    fflush(stderr);
+                    if (debug_enabled) {
+                        fprintf(stderr, "[hm64] autostart skipped: missing game_id\n");
+                        fflush(stderr);
+                    }
                     break;
                 }
                 std::u8string game_id{ game_id_cstr };
                 if (!recomp::load_stored_rom(game_id)) {
-                    fprintf(stderr, "[hm64] autostart skipped: no stored ROM loaded\n");
-                    fflush(stderr);
+                    if (debug_enabled) {
+                        fprintf(stderr, "[hm64] autostart skipped: no stored ROM loaded\n");
+                        fflush(stderr);
+                    }
                     break;
                 }
                 recomp::start_game(game_id);

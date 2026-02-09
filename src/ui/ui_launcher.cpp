@@ -20,11 +20,18 @@ extern std::vector<recomp::GameEntry> supported_games;
 static bool hm64_autostart_scheduled = false;
 static std::u8string hm64_autostart_game_id;
 
+static bool hm64_autostart_debug_enabled() {
+    const char* v = std::getenv("HM64_AUTOSTART_DEBUG");
+    return (v != nullptr && v[0] != '\0' && v[0] != '0');
+}
+
 static Uint32 hm64_autostart_timer_callback(Uint32 interval, void* param) {
     (void)interval;
     (void)param;
-    fprintf(stderr, "[hm64] autostart timer fired\n");
-    fflush(stderr);
+    if (hm64_autostart_debug_enabled()) {
+        fprintf(stderr, "[hm64] autostart timer fired\n");
+        fflush(stderr);
+    }
 
     SDL_Event event;
     SDL_zero(event);
@@ -150,10 +157,10 @@ public:
         model_handle = constructor.GetModelHandle();
 
         // Schedule autostart after the launcher UI is initialized.
-        // Default: enabled, 4 seconds delay. Disable with RECOMP_AUTOSTART=0.
+        // Default: disabled (opt-in). Enable with RECOMP_AUTOSTART=1.
         if (!hm64_autostart_scheduled && !supported_games.empty()) {
             const char* autostart_env = std::getenv("RECOMP_AUTOSTART");
-            bool autostart_enabled = true;
+            bool autostart_enabled = false;
             if (autostart_env != nullptr && autostart_env[0] != '\0') {
                 autostart_enabled = (autostart_env[0] != '0');
             }
@@ -171,8 +178,10 @@ public:
                 hm64_autostart_scheduled = true;
                 hm64_autostart_game_id = supported_games[0].game_id;
                 SDL_AddTimer((Uint32)delay_ms, hm64_autostart_timer_callback, nullptr);
-                fprintf(stderr, "[hm64] autostart scheduled in %dms\n", delay_ms);
-                fflush(stderr);
+                if (hm64_autostart_debug_enabled()) {
+                    fprintf(stderr, "[hm64] autostart scheduled in %dms\n", delay_ms);
+                    fflush(stderr);
+                }
             }
         }
     }

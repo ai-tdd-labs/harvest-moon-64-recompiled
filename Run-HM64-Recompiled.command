@@ -16,8 +16,7 @@ fi
 
 # Keep flicker mitigation on by default; users can override by exporting HM64_DISABLE_INSTANT_PRESENT=0.
 export HM64_DISABLE_INSTANT_PRESENT="${HM64_DISABLE_INSTANT_PRESENT:-1}"
-export RECOMP_AUTOSTART="${RECOMP_AUTOSTART:-1}"
-export RECOMP_AUTOSTART_DELAY_MS="${RECOMP_AUTOSTART_DELAY_MS:-1000}"
+# Autostart is opt-in; enable with RECOMP_AUTOSTART=1 (and optionally RECOMP_AUTOSTART_DELAY_MS).
+export RECOMP_AUTOSTART="${RECOMP_AUTOSTART:-0}"
 
 exec "$APP"
-
