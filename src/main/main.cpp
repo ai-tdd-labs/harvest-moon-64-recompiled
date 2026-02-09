@@ -8,6 +8,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <cinttypes>
+#include <cstdlib>
 
 #include "nfd.h"
 
@@ -576,6 +577,14 @@ int main(int argc, char** argv) {
     // Ensure debug logs (including VI/swap smoke-test logs) are not lost when the process is terminated.
     // This is especially important when redirecting stderr to a file (common in scripted repros).
     setvbuf(stderr, nullptr, _IONBF, 0);
+
+    // Default-on flicker mitigation: wait until the renderer has parsed each displaylist before the game
+    // continues and potentially mutates vertex/texture data used by that displaylist.
+    // Disable by setting HM64_DL_SYNC_PARSED=0.
+    const char* dl_sync_env = std::getenv("HM64_DL_SYNC_PARSED");
+    if (dl_sync_env == nullptr || dl_sync_env[0] == '\0') {
+        setenv("HM64_DL_SYNC_PARSED", "1", 0);
+    }
 
     recomp::Version project_version{};
     if (!recomp::Version::from_string(version_string, project_version)) {
