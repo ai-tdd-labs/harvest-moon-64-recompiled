@@ -1,4 +1,4 @@
-# Harvest Moon 64: Recompiled (WIP)
+# Harvest Moon 64 PC Port / Recomp (WIP)
 
 Work-in-progress static recompilation project for Harvest Moon 64.
 

@@ -10,7 +10,7 @@ open "$ROOT"
 
 APP="$ROOT/build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled"
 if [[ ! -x "$APP" ]]; then
-  osascript -e 'display dialog "Build not found. Run: cmake --build build --target HarvestMoon64Recompiled" buttons {"OK"} default button "OK" with title "Harvest Moon 64: Recompiled"'
+  osascript -e 'display dialog "Build not found. Run: cmake --build build --target HarvestMoon64Recompiled" buttons {"OK"} default button "OK" with title "Harvest Moon 64 PC Port / Recomp"'
   exit 1
 fi
 
