@@ -578,6 +578,14 @@ int main(int argc, char** argv) {
     // This is especially important when redirecting stderr to a file (common in scripted repros).
     setvbuf(stderr, nullptr, _IONBF, 0);
 
+    // Default-on flicker mitigation: disable RT64 "instant present" (PresentEarly).
+    // PresentEarly reduces latency but can introduce visible tearing/flicker on some setups (notably bright UI/flat colors).
+    // Users can re-enable it by explicitly setting HM64_DISABLE_INSTANT_PRESENT=0.
+    const char* disable_instant_present_env = std::getenv("HM64_DISABLE_INSTANT_PRESENT");
+    if (disable_instant_present_env == nullptr || disable_instant_present_env[0] == '\0') {
+        setenv("HM64_DISABLE_INSTANT_PRESENT", "1", 0);
+    }
+
     // Default-on flicker mitigation: wait until the renderer has parsed each displaylist before the game
     // continues and potentially mutates vertex/texture data used by that displaylist.
     // Disable by setting HM64_DL_SYNC_PARSED=0.
