@@ -30,6 +30,15 @@ One of the goals of this repo is to explore setting up and iterating on N64 reco
   - Visible framebuffer flickering (sync issue).
   - Controller input not working (NuSystem scheduler/input path still missing).
 
+## Debugging (AI-Assisted)
+
+This repo intentionally keeps short, evidence-based debug notes and repro scripts so others (including LLM agents)
+can follow the same workflow:
+
+- Flicker root cause + A/B repro: `docs/debug/flicker.md`
+- VI smoke test (unblack + swap activity): `scripts/smoke_vi.sh`
+- Instant present A/B runner: `scripts/ab_instant_present.sh`
+
 ## Quick Start (macOS)
 
 1. Clone with submodules:

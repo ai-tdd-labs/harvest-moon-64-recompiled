@@ -31,7 +31,10 @@ static inline void recomp_trace_entry(const char* func_name) {
     if (file != NULL) {
         fprintf(file, "[trace] -> %s\n", func_name);
     }
-    fprintf(stderr, "[trace] -> %s\n", func_name);
+    const char* to_stderr = getenv("RECOMP_TRACE_STDERR");
+    if (to_stderr != NULL && to_stderr[0] != '\0' && to_stderr[0] != '0') {
+        fprintf(stderr, "[trace] -> %s\n", func_name);
+    }
 }
 
 static inline void recomp_trace_return(const char* func_name) {
@@ -39,7 +42,10 @@ static inline void recomp_trace_return(const char* func_name) {
     if (file != NULL) {
         fprintf(file, "[trace] <- %s\n", func_name);
     }
-    fprintf(stderr, "[trace] <- %s\n", func_name);
+    const char* to_stderr = getenv("RECOMP_TRACE_STDERR");
+    if (to_stderr != NULL && to_stderr[0] != '\0' && to_stderr[0] != '0') {
+        fprintf(stderr, "[trace] <- %s\n", func_name);
+    }
 }
 
 #if RECOMP_TRACE
