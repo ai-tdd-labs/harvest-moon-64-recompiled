@@ -28,31 +28,12 @@ HM64_DISABLE_INSTANT_PRESENT=1 ./build/HarvestMoon64Recompiled.app/Contents/MacO
 
 ## Evidence Collection
 
-### 1) Verify the game is swapping buffers and VI is un-blackened
+We treat the A/B toggle as the primary piece of evidence:
 
-We used a minimal definition of "video works":
+- Flicker present with instant present enabled
+- Flicker gone with instant present disabled
 
-- At least one `osViBlack active=0` observed
-- Ongoing `osViSwapBuffer` activity observed
-
-Script:
-
-```bash
-./scripts/smoke_vi.sh
-```
-
-Source: `notes/vi-smoke-lessons.md`
-
-### 2) Prove it's not swapping stale framebuffers
-
-We logged hashes for the set of framebuffers the game cycles through (typically 3 in HM64).
-
-Key observation:
-
-- Each framebuffer's content changed in sequence while the swap rotated.
-- No swaps to a framebuffer that was "old" relative to the others.
-
-This rules out the common cause: cycling 3 buffers but only rendering into 1.
+That isolates the issue to present/scanout timing rather than framebuffer content generation.
 
 ## Root Cause
 
@@ -88,4 +69,3 @@ Two parts:
 # NOTE:
 # This file lives under `docs/debug/` and would match a common `.gitignore` pattern like `[Dd]ebug/`.
 # If you cannot add it, ensure `.gitignore` does not ignore `docs/` (see `.gitignore`).
-

@@ -11,6 +11,8 @@ This repo does not contain ROMs, ELFs, or extracted game assets. You must provid
 ![Intro](/docs/screenshots/intro.png)
 ![Intro 2](/docs/screenshots/intro2.png)
 ![Start Screen](/docs/screenshots/start-screen.png)
+![Season Screen](/docs/screenshots/season-screen.png)
+![In Game](/docs/screenshots/in-game.png)
 
 ## Attribution / Credits
 
@@ -31,10 +33,9 @@ One of the goals of this repo is to explore setting up and iterating on N64 reco
 
 ## Current State
 
-- Boots with video and audio.
-- Main blocker (not playable yet):
-  - Visible framebuffer flickering (sync issue).
-  - Controller input not working (NuSystem scheduler/input path still missing).
+- Playable: boots, starts the game, video + audio work, controller input works.
+- Saving: uses SRAM (save type mismatch fixed).
+- Known issues: this is still WIP and may have rendering or gameplay glitches.
 
 ## Debugging (AI-Assisted)
 
@@ -42,8 +43,15 @@ This repo intentionally keeps short, evidence-based debug notes and repro script
 can follow the same workflow:
 
 - Flicker root cause + A/B repro: `docs/debug/flicker.md`
-- VI smoke test (unblack + swap activity): `scripts/smoke_vi.sh`
 - Instant present A/B runner: `scripts/ab_instant_present.sh`
+- Trace logging defaults off (avoids stutter); toggle documented in `BUILDING.md`
+
+### What We Fixed (Reference-First, No Guessing)
+
+- Flicker/tearing on bright areas: RT64 "instant present" (PresentEarly). Fixed by defaulting `HM64_DISABLE_INSTANT_PRESENT=1` unless explicitly overridden.
+- No controller input: `nuContDataGetExAll` depended on a recompiled bcopy at `0x801008E0` that was a stub, so `contData` never updated. Fixed by hooking `nuContDataGetExAll` and copying pad data + triggers directly.
+- SRAM popup / exit: save type was misconfigured (EEP4K). Fixed by switching to SRAM in the supported game metadata.
+- Logging stutter: trace logging now defaults off (no `/tmp/hm64_trace.log` writes unless explicitly enabled).
 
 ## Quick Start (macOS)
 
