@@ -1,5 +1,12 @@
 #include <cmath>
 #include <cinttypes>
+#include <cstdint>
+#include <cstdlib>
+#include <filesystem>
+#include <fstream>
+#include <iomanip>
+#include <sstream>
+#include <string>
 
 #include "recomp.h"
 #include "librecomp/overlays.hpp"
@@ -35,6 +42,22 @@ static inline bool hm64_truthy(const char* name) {
     return recomp_env_truthy(name) != 0;
 }
 
+static inline int hm64_env_int(const char* name, int def) {
+    const char* v = getenv(name);
+    if (v == NULL || *v == '\0') {
+        return def;
+    }
+    return atoi(v);
+}
+
+static inline const char* hm64_env_str(const char* name, const char* def) {
+    const char* v = getenv(name);
+    if (v == NULL || *v == '\0') {
+        return def;
+    }
+    return v;
+}
+
 static inline bool n64_to_phys(uint32_t n64_addr, uint32_t* phys_out) {
     // Accept both raw physical and KSEG0/KSEG1 virtual addresses.
     uint32_t phys = n64_addr;
@@ -49,11 +72,66 @@ static inline bool n64_to_phys(uint32_t n64_addr, uint32_t* phys_out) {
     return true;
 }
 
-extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
-    if (!hm64_truthy("HM64_FB_HASH_LOG")) {
+static inline uint8_t expand_5_to_8(uint8_t v) {
+    // 0..31 -> 0..255
+    return (uint8_t)((v << 3) | (v >> 2));
+}
+
+static inline uint16_t read_be16_unswapped(uint8_t* rdram, uint32_t phys_addr) {
+    // RDRAM is byte-swapped by the runtime; undo it per-byte.
+    uint8_t hi = rdram[phys_addr ^ 3u];
+    uint8_t lo = rdram[(phys_addr + 1u) ^ 3u];
+    return (uint16_t)((hi << 8) | lo);
+}
+
+static void hm64_dump_fb_ppm(uint8_t* rdram, uint32_t fb_phys, uint64_t seq) {
+    // Default is N64 320x240 RGBA5551.
+    const int w = hm64_env_int("HM64_FB_DUMP_W", 320);
+    const int h = hm64_env_int("HM64_FB_DUMP_H", 240);
+    if (w <= 0 || h <= 0) {
         return;
     }
 
+    const uint32_t bytes = (uint32_t)w * (uint32_t)h * 2u;
+    if (fb_phys + bytes > 0x00800000u) {
+        fprintf(stderr, "[hm64][fbdump] #%llu fb_phys=0x%06X size=0x%X OUT_OF_RANGE\n",
+            (unsigned long long)seq, (unsigned)fb_phys, (unsigned)bytes);
+        return;
+    }
+
+    const char* dir = hm64_env_str("HM64_FB_DUMP_DIR", "tmp/fb_dump");
+    std::error_code ec;
+    std::filesystem::create_directories(dir, ec);
+
+    std::ostringstream path;
+    path << dir << "/fb_" << std::setw(6) << std::setfill('0') << seq
+         << "_phys_" << std::hex << std::uppercase << std::setw(6) << std::setfill('0') << fb_phys
+         << ".ppm";
+
+    std::ofstream out(path.str(), std::ios::binary);
+    if (!out.good()) {
+        fprintf(stderr, "[hm64][fbdump] #%llu open_failed path=%s\n",
+            (unsigned long long)seq, path.str().c_str());
+        return;
+    }
+
+    out << "P6\n" << w << " " << h << "\n255\n";
+    for (int y = 0; y < h; y++) {
+        for (int x = 0; x < w; x++) {
+            const uint32_t off = ((uint32_t)y * (uint32_t)w + (uint32_t)x) * 2u;
+            uint16_t px = read_be16_unswapped(rdram, fb_phys + off);
+            uint8_t r5 = (uint8_t)((px >> 11) & 0x1Fu);
+            uint8_t g5 = (uint8_t)((px >> 6) & 0x1Fu);
+            uint8_t b5 = (uint8_t)((px >> 1) & 0x1Fu);
+            uint8_t rgb[3] = { expand_5_to_8(r5), expand_5_to_8(g5), expand_5_to_8(b5) };
+            out.write((const char*)rgb, 3);
+        }
+    }
+
+    fprintf(stderr, "[hm64][fbdump] #%llu wrote %s\n", (unsigned long long)seq, path.str().c_str());
+}
+
+extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
     static uint64_t seq = 0;
     const uint64_t n = ++seq;
 
@@ -62,6 +140,24 @@ extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
     if (!n64_to_phys(fb_addr, &fb_phys)) {
         fprintf(stderr, "[hm64][fbhash] #%llu fb=0x%08X phys=INVALID\n",
             (unsigned long long)n, (unsigned)fb_addr);
+        return;
+    }
+
+    // Optional framebuffer dump for ground-truthing "flicker":
+    // If consecutive dumps differ, the flicker is in framebuffer content.
+    // If dumps are stable but the screen flickers, it's in present/VI/RT64.
+    if (hm64_truthy("HM64_FB_DUMP")) {
+        const int after = hm64_env_int("HM64_FB_DUMP_AFTER", 0);
+        const int every = hm64_env_int("HM64_FB_DUMP_EVERY", 1);
+        const int max = hm64_env_int("HM64_FB_DUMP_MAX", 10);
+        static int dumped = 0;
+        if ((int)n >= after && (every > 0) && (((int)n - after) % every == 0) && dumped < max) {
+            hm64_dump_fb_ppm(rdram, fb_phys, n);
+            dumped++;
+        }
+    }
+
+    if (!hm64_truthy("HM64_FB_HASH_LOG")) {
         return;
     }
 
