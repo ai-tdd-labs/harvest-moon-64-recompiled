@@ -8,6 +8,7 @@
 
 # Local-only ROM/ELF directory
 roms/
+roms
 
 # Temporary local scratch
 tmp/

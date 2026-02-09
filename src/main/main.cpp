@@ -358,7 +358,8 @@ std::vector<recomp::GameEntry> supported_games = {
         .internal_name = "HARVESTMOON64",
         .game_id = u8"hm64.n64.us.1.0",
         .mod_game_id = "hm64",
-        .save_type = recomp::SaveType::Eep4k,
+        // HM64 uses SRAM for saving (see hm64-decomp/src/buffers/sramBuffer.c and gameFile.c).
+        .save_type = recomp::SaveType::Sram,
         .is_enabled = true,
         .entrypoint_address = get_entrypoint_address(),
         .entrypoint = recomp_entrypoint,

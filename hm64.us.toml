@@ -74,3 +74,36 @@ while (MEM_BU(0x5208, 0xFFFFFFFF80200000ULL) == 0) {
 }
 ctx->r2 = MEM_BU(0x5208, 0xFFFFFFFF80200000ULL);
 """
+
+# Fix NuSystem controller data copy for HM64's NUContDataPatch.
+# The generated recompiled bcopy (0x801008E0) is currently a stub; instead, re-implement nuContDataGetExAll directly.
+[[patches.hook]]
+func = "nuContDataGetExAll"
+before_vram = 0x800FC5A0
+text = """
+// Implement: for each controller, copy sizeof(OSContPad)=6 bytes from nuContData[cnt] into contdata[cnt],
+// then set contdata[cnt].trigger = nuContData[cnt].button & (~old_button).
+// nuContData base is 0x80190000 - 0x67C0 = 0x80189840.
+gpr cont_base = 0xFFFFFFFF00000000ULL | (uint32_t)ctx->r4;
+gpr nu_base = 0xFFFFFFFF80189840ULL;
+
+nuContDataClose(rdram, ctx);
+for (int cnt = 0; cnt < 4; cnt++) {
+    gpr cont_ptr = cont_base + (cnt * 8);
+    gpr nu_ptr = nu_base + (cnt * 6);
+    uint16_t old_button = MEM_HU(0, cont_ptr);
+
+    // Copy 6 bytes (OSContPad) using guest addressing semantics.
+    for (int i = 0; i < 6; i++) {
+        uint8_t b = MEM_BU(i, nu_ptr);
+        MEM_B(i, cont_ptr) = (int8_t)b;
+    }
+
+    uint16_t new_button = MEM_HU(0, cont_ptr);
+    uint16_t trigger = (uint16_t)(new_button & (uint16_t)(~old_button));
+    MEM_H(6, cont_ptr) = (int16_t)trigger;
+}
+nuContDataOpen(rdram, ctx);
+TRACE_RETURN();
+return;
+"""
