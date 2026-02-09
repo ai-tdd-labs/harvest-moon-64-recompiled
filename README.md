@@ -6,6 +6,12 @@ This repository is currently based on the Mario Kart 64 recompilation scaffold a
 
 This repo does not contain ROMs, ELFs, or extracted game assets. You must provide your own legally obtained copy of the game.
 
+## Screenshots
+
+![Intro](/docs/screenshots/intro.png)
+![Intro 2](/docs/screenshots/intro2.png)
+![Start Screen](/docs/screenshots/start-screen.png)
+
 ## Attribution / Credits
 
 - Scaffold / upstream reference: [sonicdcer/MarioKart64Recomp](https://github.com/sonicdcer/MarioKart64Recomp) and its contributors.
@@ -53,6 +59,8 @@ can follow the same workflow:
    - `cmake --build build --target HarvestMoon64Recompiled -j$(sysctl -n hw.ncpu)`
 5. Run:
    - `./build/HarvestMoon64Recompiled.app/Contents/MacOS/HarvestMoon64Recompiled`
+
+Tip: on macOS you can also double-click `Run-HM64-Recompiled.command` to open the repo in Finder and run the built app.
 
 ## Notes
 
