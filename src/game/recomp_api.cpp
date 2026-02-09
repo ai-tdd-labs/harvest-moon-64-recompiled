@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
+#include <array>
 #include <sstream>
 #include <string>
 
@@ -32,6 +33,18 @@ static uint64_t fnv1a64_rdram_unswapped(uint8_t* rdram, uint32_t phys_addr, size
     uint64_t h = 1469598103934665603ull;
     for (size_t i = 0; i < len; i++) {
         // RDRAM is byte-swapped in the runtime; undo it for stable comparisons.
+        uint8_t b = rdram[(phys_addr + (uint32_t)i) ^ 3u];
+        h = fnv1a64_update(h, b);
+    }
+    return h;
+}
+
+static uint64_t fnv1a64_rdram_unswapped_stride(uint8_t* rdram, uint32_t phys_addr, size_t len, size_t step) {
+    uint64_t h = 1469598103934665603ull;
+    if (step == 0) {
+        step = 1;
+    }
+    for (size_t i = 0; i < len; i += step) {
         uint8_t b = rdram[(phys_addr + (uint32_t)i) ^ 3u];
         h = fnv1a64_update(h, b);
     }
@@ -131,6 +144,42 @@ static void hm64_dump_fb_ppm(uint8_t* rdram, uint32_t fb_phys, uint64_t seq) {
     fprintf(stderr, "[hm64][fbdump] #%llu wrote %s\n", (unsigned long long)seq, path.str().c_str());
 }
 
+extern "C" void recomp_vi_observe_tick(uint8_t* rdram, recomp_context* ctx) {
+    if (!hm64_truthy("HM64_VI_OBS_LOG") && !hm64_truthy("HM64_VI_OBS_DUMP")) {
+        return;
+    }
+
+    static uint64_t seq = 0;
+    const uint64_t n = ++seq;
+
+    const uint32_t cur = (uint32_t)osViGetCurrentFramebuffer();
+    const uint32_t next = (uint32_t)osViGetNextFramebuffer();
+
+    uint32_t cur_phys = 0, next_phys = 0;
+    const bool cur_ok = n64_to_phys(cur, &cur_phys);
+    const bool next_ok = n64_to_phys(next, &next_phys);
+
+    if (hm64_truthy("HM64_VI_OBS_LOG")) {
+        fprintf(stderr, "[hm64][viobs] #%llu cur=0x%08X(%s%06X) next=0x%08X(%s%06X)\n",
+            (unsigned long long)n,
+            (unsigned)cur, cur_ok ? "phys=0x" : "phys=INVALID:", (unsigned)cur_phys,
+            (unsigned)next, next_ok ? "phys=0x" : "phys=INVALID:", (unsigned)next_phys);
+    }
+
+    if (hm64_truthy("HM64_VI_OBS_DUMP") && cur_ok) {
+        const int after = hm64_env_int("HM64_VI_OBS_DUMP_AFTER", 0);
+        const int every = hm64_env_int("HM64_VI_OBS_DUMP_EVERY", 30);
+        const int max = hm64_env_int("HM64_VI_OBS_DUMP_MAX", 10);
+        static int dumped = 0;
+        if ((int)n >= after && every > 0 && (((int)n - after) % every == 0) && dumped < max) {
+            const char* dir = hm64_env_str("HM64_VI_OBS_DUMP_DIR", "tmp/vi_fb_dump");
+            setenv("HM64_FB_DUMP_DIR", dir, 1);
+            hm64_dump_fb_ppm(rdram, cur_phys, n);
+            dumped++;
+        }
+    }
+}
+
 extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
     static uint64_t seq = 0;
     const uint64_t n = ++seq;
@@ -143,6 +192,50 @@ extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
         return;
     }
 
+    // Track the set of framebuffers the game cycles through (usually 2 or 3).
+    // This lets us dump all buffers per swap, which is useful to detect
+    // "swap is showing an old/other buffer" vs "the active render target flickers".
+    static std::array<uint32_t, 3> seen_phys = { 0, 0, 0 };
+    static int seen_count = 0;
+    auto remember_fb = [&](uint32_t p) {
+        for (int i = 0; i < seen_count; i++) {
+            if (seen_phys[i] == p) {
+                return;
+            }
+        }
+        if (seen_count < (int)seen_phys.size()) {
+            seen_phys[seen_count++] = p;
+        }
+    };
+    remember_fb(fb_phys);
+
+    // Optional: track whether the game updates every framebuffer it cycles through.
+    // If it swaps among N buffers but only renders into 1, the other buffers will be stale and cause flicker.
+    if (hm64_truthy("HM64_FB_SET_LOG")) {
+        constexpr uint32_t fb_size = 0x00025800u; // 320*240*2
+        constexpr uint32_t rdram_size = 0x00800000u;
+        // Use a cheap strided hash by default; full hash is available but more expensive.
+        const int stride = hm64_env_int("HM64_FB_SET_STRIDE", 16);
+        const bool only_changed = hm64_truthy("HM64_FB_SET_ONLY_CHANGED");
+
+        static std::array<uint64_t, 3> last_hash = { 0, 0, 0 };
+        static std::array<uint64_t, 3> last_seen_seq = { 0, 0, 0 };
+        for (int i = 0; i < seen_count; i++) {
+            const uint32_t p = seen_phys[i];
+            if (p + fb_size > rdram_size) {
+                continue;
+            }
+            const uint64_t h = fnv1a64_rdram_unswapped_stride(rdram, p, fb_size, (size_t)stride);
+            const bool changed = (last_seen_seq[i] != 0) && (last_hash[i] != h);
+            if (!only_changed || changed || last_seen_seq[i] == 0) {
+                fprintf(stderr, "[hm64][fbset] #%llu idx=%d phys=0x%06X hash=%016" PRIX64 "%s\n",
+                    (unsigned long long)n, i, (unsigned)p, h, changed ? " CHANGED" : "");
+            }
+            last_hash[i] = h;
+            last_seen_seq[i] = n;
+        }
+    }
+
     // Optional framebuffer dump for ground-truthing "flicker":
     // If consecutive dumps differ, the flicker is in framebuffer content.
     // If dumps are stable but the screen flickers, it's in present/VI/RT64.
@@ -152,7 +245,14 @@ extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
         const int max = hm64_env_int("HM64_FB_DUMP_MAX", 10);
         static int dumped = 0;
         if ((int)n >= after && (every > 0) && (((int)n - after) % every == 0) && dumped < max) {
-            hm64_dump_fb_ppm(rdram, fb_phys, n);
+            const bool dump_all = hm64_truthy("HM64_FB_DUMP_ALL") && seen_count > 0;
+            if (!dump_all) {
+                hm64_dump_fb_ppm(rdram, fb_phys, n);
+            } else {
+                for (int i = 0; i < seen_count; i++) {
+                    hm64_dump_fb_ppm(rdram, seen_phys[i], n);
+                }
+            }
             dumped++;
         }
     }

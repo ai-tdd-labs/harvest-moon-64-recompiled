@@ -18,6 +18,7 @@ void recomp_debug_log_ptrs(const char* tag, uint8_t* rdram, recomp_context* ctx)
 // Debug hooks used from hm64.us.toml patches. Keep these declarations here so
 // the generated RecompiledFuncs sources can call into the native runtime.
 void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx);
+void recomp_vi_observe_tick(uint8_t* rdram, recomp_context* ctx);
 #ifdef __cplusplus
 }
 #endif

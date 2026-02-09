@@ -77,3 +77,10 @@ text = "recomp_fb_hash_tick(rdram, ctx);"
 func = "nuGfxSwapCfb"
 before_vram = 0x800FBF20
 text = "recomp_fb_hash_tick(rdram, ctx);"
+
+# Observe VI state once per retrace callback (ground truth for what buffer the runtime thinks is displayed).
+# Enable with HM64_VI_OBS_LOG=1 and/or HM64_VI_OBS_DUMP=1.
+[[patches.hook]]
+func = "gfxRetraceCallback"
+before_vram = 0x800262CC
+text = "recomp_vi_observe_tick(rdram, ctx);"
