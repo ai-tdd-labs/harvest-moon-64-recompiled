@@ -8,6 +8,7 @@
 #include <numeric>
 #include <stdexcept>
 #include <cinttypes>
+#include <cstdlib>
 
 #include "nfd.h"
 
@@ -572,6 +573,15 @@ void reorder_texture_pack(recomp::mods::ModContext&) {
 int main(int argc, char** argv) {
     (void)argc;
     (void)argv;
+
+    // Default-on flicker mitigation: disable RT64 "instant present" (PresentEarly).
+    // PresentEarly reduces latency but can introduce visible tearing/flicker on some setups (notably bright UI/flat colors).
+    // Users can re-enable it by explicitly setting HM64_DISABLE_INSTANT_PRESENT=0.
+    const char* disable_instant_present_env = std::getenv("HM64_DISABLE_INSTANT_PRESENT");
+    if (disable_instant_present_env == nullptr || disable_instant_present_env[0] == '\0') {
+        setenv("HM64_DISABLE_INSTANT_PRESENT", "1", 0);
+    }
+
     recomp::Version project_version{};
     if (!recomp::Version::from_string(version_string, project_version)) {
         ultramodern::error_handling::message_box(("Invalid version string: " + version_string).c_str());

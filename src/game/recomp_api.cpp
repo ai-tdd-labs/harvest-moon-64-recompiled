@@ -24,6 +24,18 @@ extern "C" void recomp_sleep_miliseconds(uint8_t* rdram, recomp_context* ctx) {
     ultramodern::sleep_milliseconds(time);
 }
 
+// Some builds generate optional instrumentation hooks into RecompiledFuncs that call these symbols.
+// Keep them as no-ops in release/clean branches so the project links even when instrumentation is disabled.
+extern "C" void recomp_fb_hash_tick(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    (void)ctx;
+}
+
+extern "C" void recomp_vi_observe_tick(uint8_t* rdram, recomp_context* ctx) {
+    (void)rdram;
+    (void)ctx;
+}
+
 
 extern "C" void rmonPrintf_recomp(uint8_t* rdram, recomp_context* ctx) {
     // Empty
