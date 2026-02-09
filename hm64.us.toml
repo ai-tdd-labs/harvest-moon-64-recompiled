@@ -4,8 +4,9 @@ entrypoint = 0x80025C00
 elf_path = "roms/hm64.elf"
 rom_file_path = "roms/baserom.us.z64"
 output_func_path = "RecompiledFuncs"
-# trace_mode defaults to false in reference projects; keep it off unless explicitly debugging.
-trace_mode = false
+# Keep trace_mode enabled for stable codegen; runtime trace output is disabled by default
+# (see `include/trace.h` and `-DRECOMP_ENABLE_TRACE=ON`).
+trace_mode = true
 
 [patches]
 # NOTE: Do NOT stub nuGfxThreadStart - causes black screen!
